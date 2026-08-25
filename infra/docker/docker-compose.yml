@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgis/postgis:16-3.4
@@ -9,7 +7,7 @@ services:
       POSTGRES_PASSWORD: landrecord
       POSTGRES_DB: landrecord_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -17,7 +15,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6380:6379"
 
   minio:
     image: minio/minio:latest

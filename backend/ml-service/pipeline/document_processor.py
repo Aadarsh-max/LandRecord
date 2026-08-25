@@ -4,6 +4,9 @@ from ocr.handwriting_ocr import extract_handwritten_text
 from llm_correction.correction_engine import correct_ocr_text
 from nlp.ner_extraction import extract_entities
 from nlp.field_classifier import classify_fields
+from validation.business_rules import validate_fields
+from validation.duplicate_detection import detect_duplicates
+from confidence.scoring import build_validation_summary
 
 
 def process_document(image_bytes, mode="auto"):
@@ -33,6 +36,10 @@ def process_document(image_bytes, mode="auto"):
     entities = extract_entities(final_text)
     structured_fields = classify_fields(final_text, entities)
 
+    violations = validate_fields(structured_fields)
+    duplicates = detect_duplicates(structured_fields)
+    validation_summary = build_validation_summary(structured_fields, violations, duplicates)
+
     return {
         "language_detected": "en",
         "printed_ocr": printed_result,
@@ -42,5 +49,6 @@ def process_document(image_bytes, mode="auto"):
         "correction": correction,
         "entities": entities,
         "structured_fields": structured_fields,
+        "validation_summary": validation_summary,
         "final_text": final_text
     }
