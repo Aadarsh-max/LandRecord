@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base-bg: #F6F7F2;
+  --color-base-surface: #EDEFE7;
+  --color-base-surfaceLight: #FAFBF7;
+
+  --color-ink-primary: #1C2430;
+  --color-ink-secondary: #5B6472;
+  --color-ink-muted: #8B92A0;
+
+  --color-blue-500: #2F6FED;
+  --color-blue-600: #2457C4;
+  --color-blue-700: #1B4296;
+
+  --color-green-500: #2F9E6B;
+  --color-green-600: #257F55;
+
+  --color-amia-400: #8FE3B8;
+  --color-amia-500: #4FCB8F;
+  --color-amia-600: #33A873;
+
+  --shadow-clay: 8px 8px 20px rgba(163, 172, 140, 0.35), -8px -8px 20px rgba(255, 255, 255, 0.85);
+  --shadow-clayInset: inset 6px 6px 14px rgba(163, 172, 140, 0.3), inset -6px -6px 14px rgba(255, 255, 255, 0.85);
+  --shadow-claySm: 4px 4px 10px rgba(163, 172, 140, 0.3), -4px -4px 10px rgba(255, 255, 255, 0.85);
+
+  --radius-clay: 28px;
+  --radius-claySm: 18px;
+
+  --animate-floatSlow: floatSlow 14s ease-in-out infinite;
+  --animate-floatSlower: floatSlower 18s ease-in-out infinite;
+  --animate-pulseGlow: pulseGlow 6s ease-in-out infinite;
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+  50% { transform: translate(20px, -30px) rotate(8deg); }
+}
+
+@keyframes floatSlower {
+  0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+  50% { transform: translate(-25px, 25px) rotate(-6deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.5; }
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-base-bg);
+  color: var(--color-ink-primary);
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+::selection {
+  background-color: var(--color-amia-400);
+  color: #16346B;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-blue-500);
+  outline-offset: 2px;
+}

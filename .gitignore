@@ -1,0 +1,94 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Python
+venv/
+**/venv/
+env/
+**/env/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ML model caches / weights
+backend/ml-service/models/*
+!backend/ml-service/models/.gitkeep
+*.pt
+*.pth
+*.onnx
+*.bin
+*.safetensors
+.cache/
+huggingface/
+
+# Env files
+.env
+.env.local
+.env.*.local
+**/.env
+!.env.example
+
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+.vite/
+.next/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+infra/docker/volumes/
+
+# Database data
+database/data/
+*.sqlite
+*.sqlite3
+*.db
+
+# Uploads / generated files (local dev artifacts)
+backend/api-gateway/uploads/
+backend/ml-service/uploads/
+tmp/
+temp/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Misc
+*.tsbuildinfo
+.eslintcache
