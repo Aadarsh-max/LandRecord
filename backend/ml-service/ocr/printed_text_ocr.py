@@ -1,26 +1,37 @@
 from paddleocr import PaddleOCR
 
-_engines = {}
+_engine = None
 
 
-def get_engine(lang):
-    if lang not in _engines:
-        _engines[lang] = PaddleOCR(use_angle_cls=True, lang=lang, show_log=False)
-    return _engines[lang]
+def get_engine():
+    global _engine
+    if _engine is None:
+        _engine = PaddleOCR(
+            lang="en",
+            enable_mkldnn=False,
+            use_doc_orientation_classify=False,
+            use_doc_unwarping=False,
+            use_textline_orientation=False
+        )
+    return _engine
 
 
-def extract_printed_text(image, lang="en"):
-    engine = get_engine(lang)
-    result = engine.ocr(image, cls=True)
+def extract_printed_text(image):
+    engine = get_engine()
+    result = engine.predict(image)
 
     lines = []
-    if result and result[0]:
-        for entry in result[0]:
-            box, (text, confidence) = entry
+    if result:
+        page = result[0]
+        texts = page.get("rec_texts", [])
+        scores = page.get("rec_scores", [])
+        boxes = page.get("rec_polys", [])
+
+        for i in range(len(texts)):
             lines.append({
-                "text": text,
-                "confidence": round(float(confidence), 4),
-                "bbox": box
+                "text": texts[i],
+                "confidence": round(float(scores[i]), 4) if i < len(scores) else 0.0,
+                "bbox": boxes[i].tolist() if i < len(boxes) else None
             })
 
     full_text = " ".join(line["text"] for line in lines)

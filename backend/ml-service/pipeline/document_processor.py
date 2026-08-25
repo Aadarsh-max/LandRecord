@@ -1,36 +1,41 @@
 from ocr.preprocessing import preprocess_document
 from ocr.printed_text_ocr import extract_printed_text
 from ocr.handwriting_ocr import extract_handwritten_text
-from ocr.language_detector import detect_language
+from llm_correction.correction_engine import correct_ocr_text
+from llm_correction.field_autofill import autofill_fields
 
 
 def process_document(image_bytes, mode="auto"):
     processed = preprocess_document(image_bytes)
-    processed_image = processed["processed"]
+    original_image = processed["original"]
     grayscale_image = processed["grayscale"]
 
-    printed_result = extract_printed_text(processed_image, lang="en")
-    language = detect_language(printed_result["full_text"])
+    printed_result = extract_printed_text(original_image)
 
-    if language != "en":
-        printed_result = extract_printed_text(processed_image, lang=language)
-
-    response = {
-        "language_detected": language,
-        "printed_ocr": printed_result,
-        "handwriting_ocr": None,
-        "final_text": printed_result["full_text"]
-    }
+    raw_text = printed_result["full_text"]
+    ocr_confidence = printed_result["avg_confidence"]
 
     should_try_handwriting = mode == "handwritten" or (
-        mode == "auto" and printed_result["avg_confidence"] < 0.55
+        mode == "auto" and ocr_confidence < 0.55
     )
 
+    handwriting_result = None
     if should_try_handwriting:
         handwriting_result = extract_handwritten_text(grayscale_image)
-        response["handwriting_ocr"] = handwriting_result
+        if handwriting_result["confidence"] > ocr_confidence:
+            raw_text = handwriting_result["full_text"]
+            ocr_confidence = handwriting_result["confidence"]
 
-        if handwriting_result["confidence"] > printed_result["avg_confidence"]:
-            response["final_text"] = handwriting_result["full_text"]
+    correction = correct_ocr_text(raw_text)
+    autofilled_fields = autofill_fields(correction["corrected_text"])
 
-    return response
+    return {
+        "language_detected": "en",
+        "printed_ocr": printed_result,
+        "handwriting_ocr": handwriting_result,
+        "raw_text": raw_text,
+        "ocr_confidence": ocr_confidence,
+        "correction": correction,
+        "autofilled_fields": autofilled_fields,
+        "final_text": correction["corrected_text"]
+    }
