@@ -8,6 +8,7 @@ import dashboardRoutes from "./routes/dashboard.js";
 import searchRoutes from "./routes/search.js";
 import riskRoutes from "./routes/risk.js";
 import gisRoutes from "./routes/gis.js";
+import integrationRoutes from "./routes/integrations.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/risk", riskRoutes);
 app.use("/api/gis", gisRoutes);
+app.use("/api/integrations", integrationRoutes);
 
 const port = process.env.API_PORT || 4000;
 
