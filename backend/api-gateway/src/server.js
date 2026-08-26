@@ -5,6 +5,8 @@ import authRoutes from "./routes/auth.js";
 import documentRoutes from "./routes/documents.js";
 import recordRoutes from "./routes/records.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import searchRoutes from "./routes/search.js";
+import riskRoutes from "./routes/risk.js";
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/records", recordRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/risk", riskRoutes);
 
 const port = process.env.API_PORT || 4000;
 
