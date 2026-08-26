@@ -1,9 +1,10 @@
+import "./env.js";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
-
-dotenv.config();
+import documentRoutes from "./routes/documents.js";
+import recordRoutes from "./routes/records.js";
+import dashboardRoutes from "./routes/dashboard.js";
 
 const app = express();
 
@@ -15,6 +16,9 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/documents", documentRoutes);
+app.use("/api/records", recordRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 const port = process.env.API_PORT || 4000;
 
