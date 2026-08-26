@@ -5,9 +5,11 @@ import FloatingBackground from "../components/common/FloatingBackground";
 import TextInput from "../components/common/TextInput";
 import PasswordInput from "../components/common/PasswordInput";
 import Button from "../components/common/Button";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,6 +20,7 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
+      await login(email, password);
       navigate("/dashboard");
     } catch {
       setError("Invalid email or password");
@@ -75,16 +78,6 @@ export default function Login() {
             />
 
             {error && <p className="text-sm text-red-500">{error}</p>}
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-ink-secondary">
-                <input type="checkbox" className="h-4 w-4 rounded border-ink-muted accent-blue-500" />
-                Remember me
-              </label>
-              <a href="#" className="font-medium text-blue-600 hover:text-blue-700">
-                Forgot password?
-              </a>
-            </div>
 
             <Button type="submit" fullWidth disabled={loading}>
               {loading ? "Signing in..." : "Sign in"}

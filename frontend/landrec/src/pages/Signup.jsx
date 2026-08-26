@@ -5,9 +5,11 @@ import FloatingBackground from "../components/common/FloatingBackground";
 import TextInput from "../components/common/TextInput";
 import PasswordInput from "../components/common/PasswordInput";
 import Button from "../components/common/Button";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const { signup } = useAuth();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -33,7 +35,10 @@ export default function Signup() {
 
     setLoading(true);
     try {
+      await signup(form.name, form.email, form.password, form.department);
       navigate("/login");
+    } catch (signupError) {
+      setError(signupError.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
     }
