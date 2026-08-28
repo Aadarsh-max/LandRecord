@@ -19,7 +19,7 @@ async def extract_document(
     language: str = Form(None)
 ):
     image_bytes = await file.read()
-    result = process_document(image_bytes, mode=mode, language_hint=language)
+    result = process_document(image_bytes, mode=mode, language_hint=language, filename=file.filename)
     return {
         "filename": file.filename,
         "mode": mode,
