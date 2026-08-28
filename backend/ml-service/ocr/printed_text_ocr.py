@@ -5,6 +5,12 @@ _engines = {}
 MODEL_OVERRIDES = {
     "devanagari": {
         "text_recognition_model_name": "devanagari_PP-OCRv5_mobile_rec"
+    },
+    "tamil": {
+        "text_recognition_model_name": "ta_PP-OCRv5_mobile_rec"
+    },
+    "telugu": {
+        "text_recognition_model_name": "te_PP-OCRv5_mobile_rec"
     }
 }
 
@@ -72,3 +78,6 @@ def extract_best_language(image, candidate_langs=("en", "devanagari")):
 
     best_lang = max(results, key=lambda l: results[l]["avg_confidence"])
     return best_lang, results[best_lang]
+
+
+SUPPORTED_LANGUAGES = ["en", "devanagari", "tamil", "telugu"]

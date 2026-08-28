@@ -5,15 +5,24 @@ import DropZone from "../components/upload/DropZone";
 import Button from "../components/common/Button";
 import { useUpload } from "../hooks/useUpload";
 
+const LANGUAGE_OPTIONS = [
+  { value: "", label: "Auto-detect (English / Hindi / Marathi)" },
+  { value: "en", label: "English" },
+  { value: "devanagari", label: "Hindi / Marathi (Devanagari)" },
+  { value: "tamil", label: "Tamil" },
+  { value: "telugu", label: "Telugu" }
+];
+
 export default function UploadDocument() {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [language, setLanguage] = useState("");
   const { uploadDocument, uploading, error, result } = useUpload();
   const navigate = useNavigate();
 
   async function handleUpload() {
     if (!selectedFile) return;
     try {
-      const response = await uploadDocument(selectedFile);
+      const response = await uploadDocument(selectedFile, "auto", language);
       setTimeout(() => navigate("/verification", { state: { recordId: response.land_record.id } }), 1200);
     } catch {
       // error already captured in hook state
@@ -29,6 +38,20 @@ export default function UploadDocument() {
         <p className="mt-1 text-sm text-ink-secondary">Scanned images or PDFs are supported</p>
 
         <div className="mt-8 max-w-2xl">
+          <label htmlFor="language" className="mb-2 block text-sm font-medium text-ink-secondary">
+            Document language
+          </label>
+          <select
+            id="language"
+            value={language}
+            onChange={(event) => setLanguage(event.target.value)}
+            className="mb-6 w-full rounded-claySm bg-base-surface px-4 py-3 text-sm text-ink-primary shadow-clayInset focus:outline-none"
+          >
+            {LANGUAGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+
           <DropZone onFileSelect={setSelectedFile} selectedFile={selectedFile} />
 
           {error && (

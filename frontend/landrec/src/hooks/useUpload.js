@@ -6,7 +6,7 @@ export function useUpload() {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
-  async function uploadDocument(file, mode = "auto") {
+  async function uploadDocument(file, mode = "auto", language = "") {
     setUploading(true);
     setError("");
     setResult(null);
@@ -14,6 +14,9 @@ export function useUpload() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("mode", mode);
+    if (language) {
+      formData.append("language", language);
+    }
 
     try {
       const response = await api.post("/documents/upload", formData, {

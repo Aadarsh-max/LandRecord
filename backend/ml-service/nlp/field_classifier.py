@@ -23,10 +23,8 @@ ENTITY_TO_FIELD = {
     "VILLAGE": "village",
     "TEHSIL": "tehsil",
     "DISTRICT": "district",
-    "PERSON": "landowner_name",
     "GPE": "location_hint"
 }
-
 TARGET_FIELDS = [
     "landowner_name", "survey_number", "khasra_number", "khata_number",
     "plot_area", "village", "tehsil", "district", "land_classification",

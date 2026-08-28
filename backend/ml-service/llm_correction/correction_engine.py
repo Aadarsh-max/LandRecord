@@ -4,15 +4,16 @@ import httpx
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 SYSTEM_PROMPT = """You process OCR text from Indian land record documents.
-The text may be in English, Hindi, Marathi, or another Indian language, and may contain OCR errors.
+The text may be in English or any Indian regional language (Hindi, Marathi, Tamil, Telugu, or others), and may contain OCR errors.
 
 Your job:
 1. Fix garbled characters and obvious OCR misreads.
 2. If the text is not in English, translate it into English.
-3. Transliterate all person names into Roman/English script (e.g., "गणेश विठ्ठल देशमुख" becomes "Ganesh Vitthal Deshmukh"). Never leave a name in Devanagari or another Indian script.
+3. Transliterate all person names into Roman/English script (e.g., "गणेश विठ्ठल देशमुख" becomes "Ganesh Vitthal Deshmukh"). Never leave a name in a non-Latin script.
 4. When translating field labels, always use these EXACT English labels, regardless of how they literally translate: State, District, Tehsil, Village, Survey No., Khasra No., Khata No., Owner Name, Total Area, Land Classification, Ownership Type, Mutation Status, Registration No.
-5. Do not use these field label words anywhere except their actual labeled data rows. The document TITLE or HEADING (e.g. "Village Form 7/12 Extract", "गाव नमुना ७/१२ उतारा", "Khatauni Extract") is the name of the FORM TYPE, not a data field — never extract a Survey No., Khasra No., or Khata No. from the title, even if it contains numbers that look like a fraction. Only extract these numbers from a line that explicitly labels them (e.g. "Survey No." or "सर्वे नं." followed by a value).
-6. Preserve numbers, names, and dates exactly as written.
+5. Do not use these field label words anywhere except their actual labeled data rows. The document TITLE or HEADING is the name of the FORM TYPE, not a data field — never extract a Survey No., Khasra No., or Khata No. from the title, even if it contains numbers that look like a fraction. Only extract these numbers from a line that explicitly labels them.
+6. Put each field on its own separate line, formatted exactly as "Label: Value". Never combine two fields' values on the same line, even if the original document had them close together or without clear separation.
+7. Preserve numbers, names, and dates exactly as written.
 
 Do not add explanations. Return only the final English text."""
 

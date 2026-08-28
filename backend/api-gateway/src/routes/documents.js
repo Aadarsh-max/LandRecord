@@ -24,7 +24,7 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
       languageDetected: null
     });
 
-    const extraction = await extractDocument(req.file.buffer, req.file.originalname, mode);
+    const extraction = await extractDocument(req.file.buffer, req.file.originalname, mode, req.body.language);
     const result = extraction.result;
 
     const landRecord = await createLandRecord(document.id, result.structured_fields);

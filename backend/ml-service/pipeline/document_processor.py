@@ -1,6 +1,6 @@
 import time
 from ocr.preprocessing import preprocess_document
-from ocr.printed_text_ocr import extract_best_language, extract_printed_text
+from ocr.printed_text_ocr import extract_best_language, extract_printed_text, SUPPORTED_LANGUAGES
 from ocr.handwriting_ocr import extract_handwritten_text
 from llm_correction.correction_engine import correct_ocr_text
 from nlp.ner_extraction import extract_entities
@@ -18,7 +18,7 @@ def process_document(image_bytes, mode="auto", language_hint=None):
     print(f"[timing] preprocessing: {time.time() - t0:.2f}s")
 
     t1 = time.time()
-    if language_hint in ("en", "devanagari"):
+    if language_hint in SUPPORTED_LANGUAGES:
         printed_result = extract_printed_text(original_image, lang=language_hint)
         language = language_hint
     else:

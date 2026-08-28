@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List
 from pipeline.document_processor import process_document
 from search.embeddings import generate_embedding, record_to_text
 from search.vector_index import rebuild_index, search_index
@@ -13,9 +13,13 @@ router = APIRouter()
 
 
 @router.post("/ocr/extract")
-async def extract_document(file: UploadFile = File(...), mode: str = Form("auto")):
+async def extract_document(
+    file: UploadFile = File(...),
+    mode: str = Form("auto"),
+    language: str = Form(None)
+):
     image_bytes = await file.read()
-    result = process_document(image_bytes, mode=mode)
+    result = process_document(image_bytes, mode=mode, language_hint=language)
     return {
         "filename": file.filename,
         "mode": mode,
@@ -79,16 +83,6 @@ class RiskScoreRequest(BaseModel):
     duplicate_match_count: int = 0
     has_missing_fields: bool = False
 
-class MapMarkerRequest(BaseModel):
-    survey_number: str | None = None
-    village: str | None = None
-    district: str | None = None
-
-
-@router.post("/gis/marker")
-async def get_map_marker(payload: MapMarkerRequest):
-    return build_map_marker(payload.model_dump())
-
 
 @router.post("/risk/score")
 async def score_risk(payload: RiskScoreRequest):
@@ -100,12 +94,13 @@ async def tamper_check(file: UploadFile = File(...)):
     image_bytes = await file.read()
     return detect_tampering(image_bytes)
 
-@router.post("/ocr/extract")
-async def extract_document(file: UploadFile = File(...), mode: str = Form("auto"), language: str = Form(None)):
-    image_bytes = await file.read()
-    result = process_document(image_bytes, mode=mode, language_hint=language)
-    return {
-        "filename": file.filename,
-        "mode": mode,
-        "result": result
-    }
+
+class MapMarkerRequest(BaseModel):
+    survey_number: str | None = None
+    village: str | None = None
+    district: str | None = None
+
+
+@router.post("/gis/marker")
+async def get_map_marker(payload: MapMarkerRequest):
+    return build_map_marker(payload.model_dump())
