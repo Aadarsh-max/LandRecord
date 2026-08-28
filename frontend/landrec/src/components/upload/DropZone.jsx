@@ -27,7 +27,14 @@ export default function DropZone({ onFileSelect, selectedFile }) {
         isDragging ? "border-blue-500 bg-blue-500/5" : "border-ink-muted/30 bg-base-surfaceLight"
       } shadow-clayInset hover:border-blue-400`}
     >
-      <input ref={inputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,.pdf"
+        capture="environment"
+        className="hidden"
+        onChange={handleFileChange}
+      />
 
       {selectedFile ? (
         <>

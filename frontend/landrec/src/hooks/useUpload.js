@@ -18,7 +18,7 @@ export function useUpload() {
     try {
       const response = await api.post("/documents/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-        timeout: 120000
+        timeout: 200000
       });
       setResult(response.data);
       return response.data;

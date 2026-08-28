@@ -28,20 +28,29 @@ def validate_fields(structured_fields):
 
     plot_area_value = structured_fields.get("plot_area", {}).get("value")
     if plot_area_value:
-        area_match = re.search(r"[\d.]+", plot_area_value)
-        if area_match:
-            area_number = float(area_match.group(0))
-            if area_number <= 0 or area_number > 10000:
-                violations.append({
-                    "field": "plot_area",
-                    "rule": "area_out_of_range",
-                    "message": f"plot_area value '{plot_area_value}' is outside plausible range"
-                })
-        else:
+        try:
+            area_match = re.search(r"\d+\.\d+", str(plot_area_value))
+            if area_match:
+                area_number = float(area_match.group(0))
+                if area_number <= 0 or area_number > 10000:
+                    violations.append({
+                        "field": "plot_area",
+                        "rule": "area_out_of_range",
+                        "message": f"plot_area value '{plot_area_value}' is outside plausible range"
+                    })
+            else:
+                digits_only = re.search(r"\d+", str(plot_area_value))
+                if not digits_only:
+                    violations.append({
+                        "field": "plot_area",
+                        "rule": "invalid_area_format",
+                        "message": f"plot_area value '{plot_area_value}' has no numeric component"
+                    })
+        except (ValueError, TypeError) as error:
             violations.append({
                 "field": "plot_area",
-                "rule": "invalid_area_format",
-                "message": f"plot_area value '{plot_area_value}' has no numeric component"
+                "rule": "area_parse_error",
+                "message": f"plot_area value '{plot_area_value}' could not be parsed: {error}"
             })
 
     return violations

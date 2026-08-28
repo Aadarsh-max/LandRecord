@@ -12,7 +12,7 @@ export async function extractDocument(fileBuffer, filename, mode = "auto") {
     headers: form.getHeaders(),
     maxContentLength: Infinity,
     maxBodyLength: Infinity,
-    timeout: 120000
+    timeout: 180000,
   });
 
   return response.data;

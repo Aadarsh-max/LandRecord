@@ -55,7 +55,12 @@ export async function saveDuplicateFlags(landRecordId, duplicates) {
 }
 
 export async function getLandRecordById(recordId) {
-  const recordResult = await pool.query(`SELECT * FROM land_records WHERE id = $1`, [recordId]);
+  const recordResult = await pool.query(
+    `SELECT lr.*, d.status as document_status FROM land_records lr
+     LEFT JOIN documents d ON d.id = lr.document_id
+     WHERE lr.id = $1`,
+    [recordId]
+  );
   const record = recordResult.rows[0];
   if (!record) return null;
 
@@ -69,7 +74,9 @@ export async function getLandRecordById(recordId) {
 
 export async function listLandRecords(limit = 50) {
   const result = await pool.query(
-    `SELECT * FROM land_records ORDER BY created_at DESC LIMIT $1`,
+    `SELECT lr.*, d.status as document_status FROM land_records lr
+     LEFT JOIN documents d ON d.id = lr.document_id
+     ORDER BY lr.created_at DESC LIMIT $1`,
     [limit]
   );
   return result.rows;

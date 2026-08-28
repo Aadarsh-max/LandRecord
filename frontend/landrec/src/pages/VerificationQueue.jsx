@@ -46,6 +46,13 @@ export default function VerificationQueue() {
     loadRecordDetail(selectedRecord.id);
   }
 
+  async function handleMarkVerified() {
+    if (!selectedRecord) return;
+    await api.post(`/documents/${selectedRecord.document_id}/mark-verified`);
+    loadRecordDetail(selectedRecord.id);
+    fetchRecords();
+  }
+
   function getConfidence(fieldName) {
     const entry = selectedRecord?.field_confidence?.find(
       (f) => f.field_name === fieldName,
@@ -116,13 +123,30 @@ export default function VerificationQueue() {
         <div className="flex-1 px-10 py-8">
           {selectedRecord ? (
             <>
-              <h1 className="text-2xl font-semibold text-ink-primary">
-                {selectedRecord.landowner_name || "Unverified record"}
-              </h1>
-              <p className="mt-1 text-sm text-ink-secondary">
-                Survey {selectedRecord.survey_number} · {selectedRecord.village}
-                , {selectedRecord.district}
-              </p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-2xl font-semibold text-ink-primary">
+                    {selectedRecord.landowner_name || "Unverified record"}
+                  </h1>
+                  <p className="mt-1 text-sm text-ink-secondary">
+                    Survey {selectedRecord.survey_number} · {selectedRecord.village}
+                    , {selectedRecord.district}
+                  </p>
+                </div>
+
+                {selectedRecord.document_status !== "verified" ? (
+                  <button
+                    onClick={handleMarkVerified}
+                    className="rounded-claySm bg-gradient-to-br from-green-500 to-green-600 px-5 py-2.5 text-sm font-medium text-white shadow-clay transition-all hover:-translate-y-0.5 hover:shadow-claySm"
+                  >
+                    Mark Record as Verified
+                  </button>
+                ) : (
+                  <span className="inline-block rounded-full bg-green-500/15 px-4 py-1.5 text-sm font-medium text-green-600">
+                    ✓ Verified
+                  </span>
+                )}
+              </div>
 
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {displayFields.map((fieldName) => (

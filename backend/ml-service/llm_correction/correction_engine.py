@@ -3,10 +3,18 @@ import httpx
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-SYSTEM_PROMPT = """You correct OCR errors in Indian land record documents.
-Fix garbled characters, spacing issues, and obvious misreads.
-Preserve numbers, names, and structure exactly as intended.
-Do not add explanations. Return only the corrected text."""
+SYSTEM_PROMPT = """You process OCR text from Indian land record documents.
+The text may be in English, Hindi, Marathi, or another Indian language, and may contain OCR errors.
+
+Your job:
+1. Fix garbled characters and obvious OCR misreads.
+2. If the text is not in English, translate it into English.
+3. Transliterate all person names into Roman/English script (e.g., "गणेश विठ्ठल देशमुख" becomes "Ganesh Vitthal Deshmukh"). Never leave a name in Devanagari or another Indian script.
+4. When translating field labels, always use these EXACT English labels, regardless of how they literally translate: State, District, Tehsil, Village, Survey No., Khasra No., Khata No., Owner Name, Total Area, Land Classification, Ownership Type, Mutation Status, Registration No.
+5. Do not use these field label words anywhere except their actual labeled data rows. The document TITLE or HEADING (e.g. "Village Form 7/12 Extract", "गाव नमुना ७/१२ उतारा", "Khatauni Extract") is the name of the FORM TYPE, not a data field — never extract a Survey No., Khasra No., or Khata No. from the title, even if it contains numbers that look like a fraction. Only extract these numbers from a line that explicitly labels them (e.g. "Survey No." or "सर्वे नं." followed by a value).
+6. Preserve numbers, names, and dates exactly as written.
+
+Do not add explanations. Return only the final English text."""
 
 
 def correct_with_groq(raw_text):
@@ -26,7 +34,7 @@ def correct_with_groq(raw_text):
         ],
         "temperature": 0.1,
         "max_tokens": 2048,
-        "reasoning_effort": "low"
+        "reasoning_effort": "medium"
     }
 
     response = httpx.post(GROQ_URL, headers=headers, json=payload, timeout=30.0)
@@ -41,63 +49,11 @@ def correct_with_groq(raw_text):
         raise ValueError("Groq returned empty content")
 
     return content
-    api_key = os.getenv("GROQ_API_KEY")
-    model = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
-
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": raw_text}
-        ],
-        "temperature": 0.1,
-        "max_tokens": 1024
-    }
-
-    response = httpx.post(GROQ_URL, headers=headers, json=payload, timeout=30.0)
-    response.raise_for_status()
-    data = response.json()
-
-    content = data["choices"][0]["message"].get("content", "")
-    content = content.strip() if content else ""
-
-    if not content:
-        print(f"Groq returned empty content. Full response: {data}")
-        raise ValueError("Groq returned empty content")
-
-    return content
-    api_key = os.getenv("GROQ_API_KEY")
-    model = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
-
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": raw_text}
-        ],
-        "temperature": 0.1,
-        "max_tokens": 1024
-    }
-
-    response = httpx.post(GROQ_URL, headers=headers, json=payload, timeout=30.0)
-    response.raise_for_status()
-    data = response.json()
-    return data["choices"][0]["message"]["content"].strip()
 
 
 def correct_with_ollama(raw_text):
     base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    model = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")
+    model = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:latest")
 
     payload = {
         "model": model,
@@ -105,10 +61,17 @@ def correct_with_ollama(raw_text):
         "stream": False
     }
 
-    response = httpx.post(f"{base_url}/api/generate", json=payload, timeout=60.0)
+    response = httpx.post(f"{base_url}/api/generate", json=payload, timeout=90.0)
     response.raise_for_status()
     data = response.json()
-    return data["response"].strip()
+
+    content = data.get("response", "")
+    content = content.strip() if content else ""
+
+    if not content:
+        raise ValueError("Ollama returned empty content")
+
+    return content
 
 
 def correct_ocr_text(raw_text):

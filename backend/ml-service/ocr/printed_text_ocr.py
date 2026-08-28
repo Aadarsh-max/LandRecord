@@ -1,23 +1,33 @@
 from paddleocr import PaddleOCR
 
-_engine = None
+_engines = {}
+
+MODEL_OVERRIDES = {
+    "devanagari": {
+        "text_recognition_model_name": "devanagari_PP-OCRv5_mobile_rec"
+    }
+}
 
 
-def get_engine():
-    global _engine
-    if _engine is None:
-        _engine = PaddleOCR(
-            lang="en",
-            enable_mkldnn=False,
-            use_doc_orientation_classify=False,
-            use_doc_unwarping=False,
-            use_textline_orientation=False
-        )
-    return _engine
+def get_engine(lang):
+    if lang not in _engines:
+        kwargs = {
+            "lang": lang,
+            "enable_mkldnn": False,
+            "use_doc_orientation_classify": False,
+            "use_doc_unwarping": False,
+            "use_textline_orientation": False
+        }
+        override = MODEL_OVERRIDES.get(lang)
+        if override:
+            kwargs.pop("lang", None)
+            kwargs.update(override)
+        _engines[lang] = PaddleOCR(**kwargs)
+    return _engines[lang]
 
 
-def extract_printed_text(image):
-    engine = get_engine()
+def extract_printed_text(image, lang="en"):
+    engine = get_engine(lang)
     result = engine.predict(image)
 
     lines = []
@@ -44,3 +54,21 @@ def extract_printed_text(image):
         "lines": lines,
         "avg_confidence": round(avg_confidence, 4)
     }
+
+
+def extract_best_language(image, candidate_langs=("en", "devanagari")):
+    results = {}
+    for lang in candidate_langs:
+        try:
+            outcome = extract_printed_text(image, lang=lang)
+            if outcome is not None:
+                results[lang] = outcome
+        except Exception as error:
+            print(f"OCR failed for lang '{lang}': {error}")
+            continue
+
+    if not results:
+        return "en", {"full_text": "", "lines": [], "avg_confidence": 0.0}
+
+    best_lang = max(results, key=lambda l: results[l]["avg_confidence"])
+    return best_lang, results[best_lang]

@@ -1,6 +1,4 @@
-import re
 import spacy
-from spacy.pipeline import EntityRuler
 
 _nlp = None
 
@@ -9,9 +7,9 @@ FIELD_PATTERNS = [
     {"label": "KHASRA_NUMBER", "pattern": [{"LOWER": "khasra"}, {"LOWER": "no", "OP": "?"}, {"IS_PUNCT": True, "OP": "?"}, {"LIKE_NUM": True}]},
     {"label": "KHATA_NUMBER", "pattern": [{"LOWER": "khata"}, {"LOWER": "no", "OP": "?"}, {"IS_PUNCT": True, "OP": "?"}, {"LIKE_NUM": True}]},
     {"label": "PLOT_AREA", "pattern": [{"LIKE_NUM": True}, {"LOWER": {"IN": ["acre", "acres", "hectare", "hectares", "sqft", "sq.ft"]}}]},
-    {"label": "VILLAGE", "pattern": [{"LOWER": "village"}, {"IS_PUNCT": True, "OP": "?"}, {"IS_ALPHA": True, "OP": "+"}]},
-    {"label": "TEHSIL", "pattern": [{"LOWER": {"IN": ["tehsil", "taluka"]}}, {"IS_PUNCT": True, "OP": "?"}, {"IS_ALPHA": True, "OP": "+"}]},
-    {"label": "DISTRICT", "pattern": [{"LOWER": "district"}, {"IS_PUNCT": True, "OP": "?"}, {"IS_ALPHA": True, "OP": "+"}]}
+    {"label": "VILLAGE", "pattern": [{"LOWER": "village"}, {"IS_PUNCT": True, "OP": "?"}, {"IS_ALPHA": True}]},
+    {"label": "TEHSIL", "pattern": [{"LOWER": {"IN": ["tehsil", "taluka"]}}, {"IS_PUNCT": True, "OP": "?"}, {"IS_ALPHA": True}]},
+    {"label": "DISTRICT", "pattern": [{"LOWER": "district"}, {"IS_PUNCT": True, "OP": "?"}, {"IS_ALPHA": True}]}
 ]
 
 

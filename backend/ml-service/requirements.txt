@@ -1,2 +1,17 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9
+opencv-python-headless==4.10.0.84
+paddleocr==2.8.1
+paddlepaddle==2.6.1
+pytesseract==0.3.10
+transformers==4.43.3
+torch==2.3.1
+spacy==3.7.5
+rapidfuzz==3.9.6
+psycopg2-binary==2.9.9
+pydantic==2.8.2
+faiss-cpu==1.8.0
+sentence-transformers==3.0.1
 httpx==0.27.2
 python-dotenv==1.0.1

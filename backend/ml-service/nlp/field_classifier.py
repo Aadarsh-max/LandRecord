@@ -2,12 +2,17 @@ import re
 
 NUMBER_PATTERN = re.compile(r"\d+[\d/\-]*")
 
+STOP_WORDS = r"(?=\s+(?:Total|Area|Land|Ownership|Mutation|Registration|Date|Remarks|Issued|Talathi|$))"
+
 REGEX_FALLBACKS = {
-    "survey_number": r"(?:survey|s\.?\s*no\.?)\s*[:\-]?\s*(\d+[\/\-]?\w*)",
+    "survey_number": r"survey\s*no\.?\s*[:\-]?\s*(\d+[\/\-]?\w*)",
     "khasra_number": r"khasra\s*no\.?\s*[:\-]?\s*(\d+[\/\-]?\w*)",
     "khata_number": r"khata\s*no\.?\s*[:\-]?\s*(\d+[\/\-]?\w*)",
     "registration_number": r"registration\s*no\.?\s*[:\-]?\s*(\S+)",
-    "mutation_status": r"mutation\s*(?:status)?\s*[:\-]?\s*(\w+)"
+    "mutation_status": r"mutation\s*(?:status)?\s*[:\-]?\s*(\w+)",
+    "land_classification": r"land\s*classification\s*[:\-]?\s*(\w+)",
+    "ownership_type": r"ownership\s*type\s*[:\-]?\s*(\w+)",
+    "landowner_name": r"owner\s*(?:name)?\s*[:\-]?\s*([A-Za-z][A-Za-z\s.]{2,50}?)" + STOP_WORDS
 }
 
 ENTITY_TO_FIELD = {

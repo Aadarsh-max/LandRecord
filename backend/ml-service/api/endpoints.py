@@ -99,3 +99,13 @@ async def score_risk(payload: RiskScoreRequest):
 async def tamper_check(file: UploadFile = File(...)):
     image_bytes = await file.read()
     return detect_tampering(image_bytes)
+
+@router.post("/ocr/extract")
+async def extract_document(file: UploadFile = File(...), mode: str = Form("auto"), language: str = Form(None)):
+    image_bytes = await file.read()
+    result = process_document(image_bytes, mode=mode, language_hint=language)
+    return {
+        "filename": file.filename,
+        "mode": mode,
+        "result": result
+    }

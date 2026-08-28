@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import { requireAuth } from "../middlewares/auth.js";
+import { requireAuth, requireRole } from "../middlewares/auth.js";
 import { extractDocument } from "../services/mlService.js";
 import { createDocument, updateDocumentStatus, listDocuments, getDocumentById } from "../models/Document.js";
 import { createLandRecord, saveFieldConfidence, saveDuplicateFlags } from "../models/LandRecord.js";
@@ -14,9 +14,10 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
   }
 
   const mode = req.body.mode || "auto";
+  let document;
 
   try {
-    const document = await createDocument({
+    document = await createDocument({
       filename: req.file.originalname,
       storagePath: `pending-storage/${req.file.originalname}`,
       uploadedBy: req.auth.userId,
@@ -44,6 +45,9 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
     });
   } catch (error) {
     console.error("Document processing failed:", error.message);
+    if (document) {
+      await updateDocumentStatus(document.id, "failed");
+    }
     return res.status(500).json({ message: "Document processing failed", error: error.message });
   }
 });
@@ -59,6 +63,14 @@ router.get("/:id", requireAuth, async (req, res) => {
     return res.status(404).json({ message: "Document not found" });
   }
   return res.json({ document });
+});
+
+router.post("/:id/mark-verified", requireAuth, requireRole("verifier", "admin"), async (req, res) => {
+  const updated = await updateDocumentStatus(req.params.id, "verified");
+  if (!updated) {
+    return res.status(404).json({ message: "Document not found" });
+  }
+  return res.json({ document: updated });
 });
 
 export default router;
