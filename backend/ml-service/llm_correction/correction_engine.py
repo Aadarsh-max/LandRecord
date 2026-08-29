@@ -13,9 +13,16 @@ Your job:
 4. When translating field labels, always use these EXACT English labels, regardless of how they literally translate: State, District, Tehsil, Village, Survey No., Khasra No., Khata No., Owner Name, Total Area, Land Classification, Ownership Type, Mutation Status, Registration No.
 5. Do not use these field label words anywhere except their actual labeled data rows. The document TITLE or HEADING is the name of the FORM TYPE, not a data field — never extract a Survey No., Khasra No., or Khata No. from the title, even if it contains numbers that look like a fraction. Only extract these numbers from a line that explicitly labels them.
 6. Put each field on its own separate line, formatted exactly as "Label: Value". Never combine two fields' values on the same line, even if the original document had them close together or without clear separation.
-7. Preserve numbers, names, and dates exactly as written.
+7. For District, Tehsil, and Village names specifically: use the OFFICIAL, standard English spelling of the real place (e.g. "Coimbatore" not "Koyambuthur", "Mettupalayam" not "Mettuppalayam"). Do not invent a phonetic transliteration — use the actual name as commonly spelled on maps and government records.
+8. Preserve numbers, names, and dates exactly as written.
 
 Do not add explanations. Return only the final English text."""
+
+TRANSLATE_FIELDS_PROMPT = """You will receive a JSON object with land record field values, possibly in an Indian regional language.
+Translate every value into English. Transliterate person and place names into Roman script (e.g. "முருகன் வேலு" becomes "Murugan Velu").
+For district, tehsil, and village names specifically: use the OFFICIAL, standard English spelling of the real place (e.g. "Coimbatore" not "Koyambuthur"), not an invented phonetic transliteration.
+Keep numbers, codes, and dates exactly as given.
+Return ONLY a valid JSON object with the same keys, with all values translated to English. No explanations, no markdown formatting."""
 
 
 def correct_with_groq(raw_text):
