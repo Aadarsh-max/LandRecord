@@ -1,8 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { LayoutGrid, Upload, ClipboardCheck, LogOut } from "lucide-react";
+import { LayoutGrid, Upload, ClipboardCheck, LogOut, Search } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 
 const links = [
+  { to: "/search", label: "Search", icon: Search },
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { to: "/upload", label: "Upload", icon: Upload },
   { to: "/verification", label: "Verification", icon: ClipboardCheck }
