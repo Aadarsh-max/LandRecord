@@ -1,4 +1,5 @@
 import time
+from preprocessing.image_preprocessing import preprocess_document
 from sarvam_extraction import extract_fields_with_sarvam, to_sarvam_language_code, translate_extracted_fields
 from validation.business_rules import validate_fields
 from validation.duplicate_detection import detect_duplicates
@@ -29,11 +30,24 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
 
     print(f"[debug] language_hint received: {repr(language_hint)}")
 
+    tpre = time.time()
+    preprocess_result = preprocess_document(image_bytes)
+    print(f"[timing] preprocessing: {time.time() - tpre:.2f}s")
+
+    if preprocess_result["success"]:
+        image_to_send = preprocess_result["processed_bytes"]
+        image_quality = preprocess_result["quality_after"]
+    else:
+        print(f"[preprocessing] failed, using original image: {preprocess_result.get('error')}")
+        image_to_send = image_bytes
+        image_quality = {"warnings": []}
+
     language_code = to_sarvam_language_code(language_hint or "en")
     print(f"[debug] resolved language_code: {language_code}")
 
-    extraction_result = extract_fields_with_sarvam(image_bytes, filename, language_code=language_code)
-    print(f"[timing] Sarvam extraction: {time.time() - t0:.2f}s")
+    t1 = time.time()
+    extraction_result = extract_fields_with_sarvam(image_to_send, filename, language_code=language_code)
+    print(f"[timing] Sarvam extraction: {time.time() - t1:.2f}s")
 
     if not extraction_result["success"]:
         empty_fields = build_structured_fields({})
@@ -41,6 +55,7 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
             "language_detected": language_hint or "en",
             "ocr_confidence": 0.0,
             "structured_fields": empty_fields,
+            "image_quality": image_quality,
             "validation_summary": build_validation_summary(
                 empty_fields,
                 [{"field": "document", "rule": "extraction_failed", "message": extraction_result["error"]}],
@@ -52,9 +67,9 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
 
     raw_fields = extraction_result["fields"]
 
-    t1 = time.time()
+    t2 = time.time()
     translated_fields = translate_extracted_fields(raw_fields) if language_code != "en-IN" else raw_fields
-    print(f"[timing] Translation: {time.time() - t1:.2f}s")
+    print(f"[timing] Translation: {time.time() - t2:.2f}s")
 
     structured_fields = build_structured_fields(translated_fields)
 
@@ -72,6 +87,7 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
         "language_detected": language_hint or "en",
         "ocr_confidence": overall_confidence,
         "structured_fields": structured_fields,
+        "image_quality": image_quality,
         "validation_summary": validation_summary,
         "final_text": str(translated_fields)
     }
