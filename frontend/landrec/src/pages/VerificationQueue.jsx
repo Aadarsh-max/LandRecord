@@ -5,6 +5,7 @@ import FieldReviewCard from "../components/review/FieldReviewCard";
 import api from "../services/api";
 import RiskScoreWidget from "../components/dashboard/RiskScoreWidget";
 import ParcelMap from "../components/map/ParcelMap";
+import EkycWidget from "../components/dashboard/EkycWidget";
 
 export default function VerificationQueue() {
   const location = useLocation();
@@ -129,8 +130,8 @@ export default function VerificationQueue() {
                     {selectedRecord.landowner_name || "Unverified record"}
                   </h1>
                   <p className="mt-1 text-sm text-ink-secondary">
-                    Survey {selectedRecord.survey_number} · {selectedRecord.village}
-                    , {selectedRecord.district}
+                    Survey {selectedRecord.survey_number} ·{" "}
+                    {selectedRecord.village}, {selectedRecord.district}
                   </p>
                 </div>
 
@@ -162,6 +163,9 @@ export default function VerificationQueue() {
               </div>
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <RiskScoreWidget recordId={selectedRecord.id} />
+                <EkycWidget record={selectedRecord} />
+              </div>
+              <div className="mt-4">
                 <ParcelMap record={selectedRecord} />
               </div>
             </>

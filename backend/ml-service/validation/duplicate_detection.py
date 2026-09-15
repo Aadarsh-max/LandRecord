@@ -30,3 +30,13 @@ def detect_duplicates(structured_fields, threshold=85):
             })
 
     return duplicates
+
+
+def get_records_for_survey_number(survey_number):
+    if not survey_number:
+        return []
+    existing_records = fetch_existing_records()
+    return [
+        record for record in existing_records
+        if record.get("survey_number") == survey_number
+    ]

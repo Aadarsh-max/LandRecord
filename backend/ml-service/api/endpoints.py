@@ -8,6 +8,8 @@ from search.query_parser import parse_query_filters
 from risk_scoring.dispute_risk_model import compute_risk_score
 from forensics.tamper_detection import detect_tampering
 from gis.map_overlay_builder import build_map_marker
+from validation.duplicate_detection import get_records_for_survey_number
+from ekyc.identity_verification import run_ekyc_check
 
 router = APIRouter()
 
@@ -104,3 +106,14 @@ class MapMarkerRequest(BaseModel):
 @router.post("/gis/marker")
 async def get_map_marker(payload: MapMarkerRequest):
     return build_map_marker(payload.model_dump())
+
+
+class EkycRequest(BaseModel):
+    owner_name: str
+    survey_number: str | None = None
+
+
+@router.post("/ekyc/verify")
+async def verify_ekyc(payload: EkycRequest):
+    prior_records = get_records_for_survey_number(payload.survey_number)
+    return run_ekyc_check(payload.owner_name, payload.survey_number, prior_records)

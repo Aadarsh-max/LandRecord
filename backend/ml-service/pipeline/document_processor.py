@@ -2,9 +2,10 @@ import time
 from preprocessing.image_preprocessing import preprocess_document
 from sarvam_extraction import extract_fields_with_sarvam, to_sarvam_language_code, translate_extracted_fields
 from validation.business_rules import validate_fields
-from validation.duplicate_detection import detect_duplicates
+from validation.duplicate_detection import detect_duplicates, get_records_for_survey_number
 from confidence.scoring import build_validation_summary
 from confidence.field_scoring import compute_field_confidence
+from ekyc.identity_verification import run_ekyc_check
 
 TARGET_FIELDS = [
     "landowner_name", "survey_number", "khasra_number", "khata_number",
@@ -61,6 +62,7 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
                 [{"field": "document", "rule": "extraction_failed", "message": extraction_result["error"]}],
                 []
             ),
+            "ekyc_check": None,
             "final_text": "",
             "error": extraction_result["error"]
         }
@@ -75,6 +77,12 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
 
     violations = validate_fields(structured_fields)
     duplicates = detect_duplicates(structured_fields)
+
+    owner_name_value = structured_fields.get("landowner_name", {}).get("value")
+    survey_number_value = structured_fields.get("survey_number", {}).get("value")
+    prior_records = get_records_for_survey_number(survey_number_value)
+    ekyc_result = run_ekyc_check(owner_name_value, survey_number_value, prior_records)
+
     validation_summary = build_validation_summary(structured_fields, violations, duplicates)
 
     overall_confidence = round(
@@ -89,5 +97,6 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
         "structured_fields": structured_fields,
         "image_quality": image_quality,
         "validation_summary": validation_summary,
+        "ekyc_check": ekyc_result,
         "final_text": str(translated_fields)
     }
