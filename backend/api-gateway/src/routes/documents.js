@@ -3,8 +3,10 @@ import multer from "multer";
 import { requireAuth, requireRole } from "../middlewares/auth.js";
 import { extractDocument } from "../services/mlService.js";
 import { createDocument, updateDocumentStatus, listDocuments, getDocumentById } from "../models/Document.js";
-import { createLandRecord, saveFieldConfidence, saveDuplicateFlags } from "../models/LandRecord.js";
+import { createLandRecord, saveFieldConfidence, saveDuplicateFlags, getLandRecordById } from "../models/LandRecord.js";
 import { createBatch, updateBatchProgress, completeBatch, getBatchById, getBatchDocuments } from "../models/Batch.js";
+import { sendNotification, buildDigitizationMessage, buildVerificationMessage } from "../services/notificationService.js";
+import { pool } from "../config/db.js";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -37,6 +39,12 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
 
     const finalStatus = result.validation_summary.needs_human_review ? "pending" : "verified";
     await updateDocumentStatus(document.id, finalStatus);
+
+    const landownerEmail = req.body.landowner_email || null;
+    if (landownerEmail) {
+      const { subject, body } = buildDigitizationMessage(landRecord.landowner_name, landRecord.survey_number);
+      await sendNotification(landownerEmail, subject, body);
+    }
 
     return res.status(201).json({
       document: { ...document, status: finalStatus },
@@ -71,6 +79,13 @@ router.post("/:id/mark-verified", requireAuth, requireRole("verifier", "admin"),
   if (!updated) {
     return res.status(404).json({ message: "Document not found" });
   }
+
+  const record = await getLandRecordById(req.params.id);
+  if (record?.landowner_email) {
+    const { subject, body } = buildVerificationMessage(record.landowner_name, record.survey_number);
+    await sendNotification(record.landowner_email, subject, body);
+  }
+
   return res.json({ document: updated });
 });
 

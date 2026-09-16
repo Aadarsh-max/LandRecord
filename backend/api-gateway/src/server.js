@@ -10,6 +10,7 @@ import riskRoutes from "./routes/risk.js";
 import gisRoutes from "./routes/gis.js";
 import integrationRoutes from "./routes/integrations.js";
 import ekycRoutes from "./routes/ekyc.js";
+import publicRoutes from "./routes/public.js";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/risk", riskRoutes);
 app.use("/api/gis", gisRoutes);
 app.use("/api/integrations", integrationRoutes);
 app.use("/api/ekyc", ekycRoutes);
+app.use("/api/public", publicRoutes);
 
 const port = process.env.API_PORT || 4000;
 
