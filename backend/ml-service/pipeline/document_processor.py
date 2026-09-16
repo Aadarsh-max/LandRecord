@@ -1,22 +1,14 @@
-import time
-from preprocessing.image_preprocessing import preprocess_document
-from sarvam_extraction import extract_fields_with_sarvam, to_sarvam_language_code, translate_extracted_fields
-from validation.business_rules import validate_fields
-from validation.duplicate_detection import detect_duplicates, get_records_for_survey_number
-from confidence.scoring import build_validation_summary
-from confidence.field_scoring import compute_field_confidence
-from ekyc.identity_verification import run_ekyc_check
-
-TARGET_FIELDS = [
-    "landowner_name", "survey_number", "khasra_number", "khata_number",
-    "plot_area", "village", "tehsil", "district", "land_classification",
-    "ownership_type", "mutation_status", "registration_number"
+TENANCY_TARGET_FIELDS = [
+    "occupant_name", "survey_number", "hissa_number", "plot_area", "village",
+    "tehsil", "district", "land_classification", "tenant_names",
+    "mutation_entry_number", "mutation_date", "remarks"
 ]
 
 
-def build_structured_fields(raw_fields):
+def build_structured_fields(raw_fields, field_list=None):
+    fields_to_use = field_list or TARGET_FIELDS
     structured = {}
-    for field_name in TARGET_FIELDS:
+    for field_name in fields_to_use:
         value = raw_fields.get(field_name)
         confidence = compute_field_confidence(field_name, value)
         if confidence == 0.0:
@@ -26,10 +18,10 @@ def build_structured_fields(raw_fields):
     return structured
 
 
-def process_document(image_bytes, mode="auto", language_hint=None, filename="document.jpg"):
+def process_document(image_bytes, mode="auto", language_hint=None, filename="document.jpg", document_type="standard"):
     t0 = time.time()
 
-    print(f"[debug] language_hint received: {repr(language_hint)}")
+    print(f"[debug] language_hint received: {repr(language_hint)}, document_type: {document_type}")
 
     tpre = time.time()
     preprocess_result = preprocess_document(image_bytes)
@@ -44,16 +36,18 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
         image_quality = {"warnings": []}
 
     language_code = to_sarvam_language_code(language_hint or "en")
-    print(f"[debug] resolved language_code: {language_code}")
 
     t1 = time.time()
-    extraction_result = extract_fields_with_sarvam(image_to_send, filename, language_code=language_code)
+    extraction_result = extract_fields_with_sarvam(image_to_send, filename, language_code=language_code, document_type=document_type)
     print(f"[timing] Sarvam extraction: {time.time() - t1:.2f}s")
 
+    active_field_list = TENANCY_TARGET_FIELDS if document_type == "tenancy" else TARGET_FIELDS
+
     if not extraction_result["success"]:
-        empty_fields = build_structured_fields({})
+        empty_fields = build_structured_fields({}, active_field_list)
         return {
             "language_detected": language_hint or "en",
+            "document_type": document_type,
             "ocr_confidence": 0.0,
             "structured_fields": empty_fields,
             "image_quality": image_quality,
@@ -73,13 +67,19 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
     translated_fields = translate_extracted_fields(raw_fields) if language_code != "en-IN" else raw_fields
     print(f"[timing] Translation: {time.time() - t2:.2f}s")
 
-    structured_fields = build_structured_fields(translated_fields)
+    structured_fields = build_structured_fields(translated_fields, active_field_list)
 
-    violations = validate_fields(structured_fields)
-    duplicates = detect_duplicates(structured_fields)
+    if document_type == "tenancy":
+        violations = []
+        duplicates = []
+        owner_name_value = structured_fields.get("occupant_name", {}).get("value")
+        survey_number_value = structured_fields.get("survey_number", {}).get("value")
+    else:
+        violations = validate_fields(structured_fields)
+        duplicates = detect_duplicates(structured_fields)
+        owner_name_value = structured_fields.get("landowner_name", {}).get("value")
+        survey_number_value = structured_fields.get("survey_number", {}).get("value")
 
-    owner_name_value = structured_fields.get("landowner_name", {}).get("value")
-    survey_number_value = structured_fields.get("survey_number", {}).get("value")
     prior_records = get_records_for_survey_number(survey_number_value)
     ekyc_result = run_ekyc_check(owner_name_value, survey_number_value, prior_records)
 
@@ -93,6 +93,7 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
 
     return {
         "language_detected": language_hint or "en",
+        "document_type": document_type,
         "ocr_confidence": overall_confidence,
         "structured_fields": structured_fields,
         "image_quality": image_quality,

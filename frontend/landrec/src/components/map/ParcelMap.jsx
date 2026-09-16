@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
-import { MapPin, Loader2, ExternalLink } from "lucide-react";
+import {
+  MapPin,
+  Loader2,
+  ExternalLink,
+  Satellite,
+  AlertTriangle,
+} from "lucide-react";
+
 import api from "../../services/api";
 
 export default function ParcelMap({ record }) {
   const [marker, setMarker] = useState(null);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [satelliteMode, setSatelliteMode] = useState(false);
 
   useEffect(() => {
     if (!record) {
@@ -22,6 +30,8 @@ export default function ParcelMap({ record }) {
         survey_number: record.survey_number,
         village: record.village,
         district: record.district,
+        plot_area: record.plot_area,
+        land_classification: record.land_classification,
       })
       .then((response) => {
         setMarker(response.data);
@@ -35,7 +45,16 @@ export default function ParcelMap({ record }) {
       });
   }, [record]);
 
-  // Loading state
+  if (!record) {
+    return (
+      <div className="rounded-clay bg-base-surfaceLight p-5 shadow-clay">
+        <p className="text-sm text-ink-secondary">
+          Select a land record to view its location.
+        </p>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center rounded-clay bg-base-surfaceLight p-8 shadow-clay">
@@ -47,21 +66,27 @@ export default function ParcelMap({ record }) {
     );
   }
 
-  // Failed / unavailable state
   if (failed || !marker?.available) {
     return (
       <div className="rounded-clay bg-base-surfaceLight p-5 shadow-clay">
         <p className="text-sm text-ink-secondary">
           Map location unavailable for this record.
         </p>
+
+        {marker?.area_check?.checked &&
+          !marker.area_check.plausible && (
+            <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
+              <AlertTriangle className="h-3 w-3" />
+              {marker.area_check.note}
+            </p>
+          )}
       </div>
     );
   }
 
-  // Google Maps URLs
-  const embedUrl = `https://www.google.com/maps?q=${marker.latitude},${marker.longitude}&z=13&output=embed`;
-
-  const openInMapsUrl = `https://www.google.com/maps/search/?api=1&query=${marker.latitude},${marker.longitude}`;
+  const embedUrl = satelliteMode
+    ? marker.satellite_embed_url
+    : `https://www.google.com/maps?q=${marker.latitude},${marker.longitude}&z=13&output=embed`;
 
   return (
     <div className="overflow-hidden rounded-clay bg-base-surfaceLight shadow-clay">
@@ -73,30 +98,60 @@ export default function ParcelMap({ record }) {
           {marker.label}
         </p>
 
-        <span className="text-xs text-ink-muted capitalize">
+        <span className="text-xs capitalize text-ink-muted">
           {marker.precision}-level
         </span>
 
-        <a
-          href={openInMapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ml-auto flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+        {/* Satellite Toggle */}
+        <button
+          type="button"
+          onClick={() => setSatelliteMode((prev) => !prev)}
+          className={`ml-auto flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+            satelliteMode
+              ? "bg-blue-500 text-white"
+              : "bg-base-surface text-ink-secondary"
+          }`}
         >
-          Open in Maps
-          <ExternalLink className="h-3 w-3" />
-        </a>
+          <Satellite className="h-3 w-3" />
+          Satellite
+        </button>
+
+        {/* Open Google Maps */}
+        {marker.satellite_link && (
+          <a
+            href={marker.satellite_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+          >
+            Open
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
       </div>
 
-      {/* Google Maps */}
+      {/* Map */}
       <iframe
         title="Parcel location"
         src={embedUrl}
         className="h-64 w-full border-0"
         loading="lazy"
-        allowFullScreen
         referrerPolicy="no-referrer-when-downgrade"
       />
+
+      {/* Area Check */}
+      {marker.area_check?.checked && (
+        <div
+          className={`px-4 py-2 text-xs ${
+            marker.area_check.plausible
+              ? "text-green-600"
+              : "text-amber-600"
+          }`}
+        >
+          {marker.area_check.plausible ? "✓ " : "⚠ "}
+          {marker.area_check.note}
+        </div>
+      )}
     </div>
   );
 }

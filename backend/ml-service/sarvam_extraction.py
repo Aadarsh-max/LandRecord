@@ -27,6 +27,29 @@ FIELD_SCHEMA = {
     }
 }
 
+TENANCY_FIELD_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "occupant_name": {"type": "string", "description": "Name of the current occupant or authority holding the land, as listed in the occupant/possession field (e.g. 'BDA', a government body, or an individual)"},
+        "survey_number": {"type": "string", "description": "Survey number of the land parcel"},
+        "hissa_number": {"type": "string", "description": "Hissa or sub-division number of the survey number, if present"},
+        "plot_area": {"type": "string", "description": "Total extent/area of the plot with its unit"},
+        "village": {"type": "string", "description": "Village name"},
+        "tehsil": {"type": "string", "description": "Tehsil, taluk, or taluka name"},
+        "district": {"type": "string", "description": "District name"},
+        "land_classification": {"type": "string", "description": "Type/classification of land, e.g. Agricultural, Residential"},
+        "tenant_names": {"type": "string", "description": "Comma-separated list of all tenant or cultivator names listed in the tenancy/rights table"},
+        "mutation_entry_number": {"type": "string", "description": "Mutation entry number, if present"},
+        "mutation_date": {"type": "string", "description": "Date of the mutation entry, if present"},
+        "remarks": {"type": "string", "description": "Any remarks, notes, or 'other rights' text on the document"}
+    }
+}
+
+SCHEMA_BY_DOCUMENT_TYPE = {
+    "standard": FIELD_SCHEMA,
+    "tenancy": TENANCY_FIELD_SCHEMA
+}
+
 LANGUAGE_CODE_MAP = {
     "en": "en-IN",
     "devanagari": "hi-IN",
@@ -60,15 +83,16 @@ def get_client():
     return _client
 
 
-def extract_fields_with_sarvam(file_bytes, filename, language_code="en-IN", poll_interval=3, timeout=120):
+def extract_fields_with_sarvam(file_bytes, filename, language_code="en-IN", document_type="standard", poll_interval=3, timeout=120):
     client = get_client()
 
     content_type = "application/pdf" if filename.lower().endswith(".pdf") else "image/jpeg"
+    schema = SCHEMA_BY_DOCUMENT_TYPE.get(document_type, FIELD_SCHEMA)
 
     try:
         job = client.doc_ai.extract(
             file=[(filename, file_bytes, content_type)],
-            schema=json.dumps(FIELD_SCHEMA),
+            schema=json.dumps(schema),
             language=language_code,
             output_format="json"
         )

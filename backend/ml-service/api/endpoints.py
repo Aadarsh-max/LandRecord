@@ -101,6 +101,8 @@ class MapMarkerRequest(BaseModel):
     survey_number: str | None = None
     village: str | None = None
     district: str | None = None
+    plot_area: str | None = None
+    land_classification: str | None = None
 
 
 @router.post("/gis/marker")
@@ -117,3 +119,18 @@ class EkycRequest(BaseModel):
 async def verify_ekyc(payload: EkycRequest):
     prior_records = get_records_for_survey_number(payload.survey_number)
     return run_ekyc_check(payload.owner_name, payload.survey_number, prior_records)
+
+@router.post("/ocr/extract")
+async def extract_document(
+    file: UploadFile = File(...),
+    mode: str = Form("auto"),
+    language: str = Form(None),
+    document_type: str = Form("standard")
+):
+    image_bytes = await file.read()
+    result = process_document(image_bytes, mode=mode, language_hint=language, filename=file.filename, document_type=document_type)
+    return {
+        "filename": file.filename,
+        "mode": mode,
+        "result": result
+    }
