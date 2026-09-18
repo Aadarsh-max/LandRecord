@@ -4,6 +4,7 @@ import { FileText, CheckCircle2, Clock, AlertTriangle, Upload, ClipboardCheck, S
 import Sidebar from "../components/common/Sidebar";
 import DistrictChart from "../components/dashboard/DistrictChart";
 import RecentActivity from "../components/dashboard/RecentActivity";
+import ErrorStatsPanel from "../components/dashboard/ErrorStatsPanel";
 import api from "../services/api";
 
 export default function Dashboard() {
@@ -89,11 +90,15 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="rounded-clay bg-base-surfaceLight p-6 shadow-clay">
-            <h2 className="text-lg font-medium text-ink-primary">Recent uploads</h2>
-            <p className="mt-1 text-sm text-ink-secondary">Latest documents processed</p>
-            <div className="mt-4">
-              <RecentActivity items={recent} />
+          <div className="space-y-5">
+            <ErrorStatsPanel />
+
+            <div className="rounded-clay bg-base-surfaceLight p-6 shadow-clay">
+              <h2 className="text-lg font-medium text-ink-primary">Recent uploads</h2>
+              <p className="mt-1 text-sm text-ink-secondary">Latest documents processed</p>
+              <div className="mt-4">
+                <RecentActivity items={recent} />
+              </div>
             </div>
           </div>
         </div>
