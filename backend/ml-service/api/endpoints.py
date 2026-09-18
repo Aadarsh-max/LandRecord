@@ -10,6 +10,8 @@ from forensics.tamper_detection import detect_tampering
 from gis.map_overlay_builder import build_map_marker
 from validation.duplicate_detection import get_records_for_survey_number
 from ekyc.identity_verification import run_ekyc_check
+from pipeline.document_processor import process_document, process_pdf_document
+from preprocessing.pdf_handling import is_pdf
 
 router = APIRouter()
 
@@ -18,10 +20,11 @@ router = APIRouter()
 async def extract_document(
     file: UploadFile = File(...),
     mode: str = Form("auto"),
-    language: str = Form(None)
+    language: str = Form(None),
+    document_type: str = Form("standard")
 ):
     image_bytes = await file.read()
-    result = process_document(image_bytes, mode=mode, language_hint=language, filename=file.filename)
+    result = process_document(image_bytes, mode=mode, language_hint=language, filename=file.filename, document_type=document_type)
     return {
         "filename": file.filename,
         "mode": mode,
@@ -127,8 +130,13 @@ async def extract_document(
     language: str = Form(None),
     document_type: str = Form("standard")
 ):
-    image_bytes = await file.read()
-    result = process_document(image_bytes, mode=mode, language_hint=language, filename=file.filename, document_type=document_type)
+    file_bytes = await file.read()
+
+    if is_pdf(file.filename):
+        result = process_pdf_document(file_bytes, mode=mode, language_hint=language, filename=file.filename, document_type=document_type)
+    else:
+        result = process_document(file_bytes, mode=mode, language_hint=language, filename=file.filename, document_type=document_type)
+
     return {
         "filename": file.filename,
         "mode": mode,

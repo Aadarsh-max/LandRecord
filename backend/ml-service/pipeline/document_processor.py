@@ -1,3 +1,19 @@
+import time
+from preprocessing.image_preprocessing import preprocess_document
+from preprocessing.pdf_handling import convert_pdf_to_images
+from sarvam_extraction import extract_fields_with_sarvam, to_sarvam_language_code, translate_extracted_fields
+from validation.business_rules import validate_fields
+from validation.duplicate_detection import detect_duplicates, get_records_for_survey_number
+from confidence.scoring import build_validation_summary
+from confidence.field_scoring import compute_field_confidence
+from ekyc.identity_verification import run_ekyc_check
+
+TARGET_FIELDS = [
+    "landowner_name", "survey_number", "khasra_number", "khata_number",
+    "plot_area", "village", "tehsil", "district", "land_classification",
+    "ownership_type", "mutation_status", "registration_number"
+]
+
 TENANCY_TARGET_FIELDS = [
     "occupant_name", "survey_number", "hissa_number", "plot_area", "village",
     "tehsil", "district", "land_classification", "tenant_names",
@@ -100,4 +116,33 @@ def process_document(image_bytes, mode="auto", language_hint=None, filename="doc
         "validation_summary": validation_summary,
         "ekyc_check": ekyc_result,
         "final_text": str(translated_fields)
+    }
+
+
+def process_pdf_document(pdf_bytes, mode="auto", language_hint=None, filename="document.pdf", document_type="standard"):
+    try:
+        page_images = convert_pdf_to_images(pdf_bytes)
+    except Exception as error:
+        return {
+            "error": f"Failed to convert PDF: {error}",
+            "total_pages": 0,
+            "pages": []
+        }
+
+    if not page_images:
+        return {"error": "PDF contains no readable pages", "total_pages": 0, "pages": []}
+
+    page_results = []
+    for i, image_bytes in enumerate(page_images):
+        page_filename = f"{filename}_page{i + 1}.jpg"
+        result = process_document(image_bytes, mode=mode, language_hint=language_hint, filename=page_filename, document_type=document_type)
+        page_results.append({"page_number": i + 1, "result": result})
+
+    best_page = max(page_results, key=lambda p: p["result"].get("ocr_confidence", 0))
+
+    return {
+        "total_pages": len(page_results),
+        "pages": page_results,
+        "best_page": best_page["page_number"],
+        "result": best_page["result"]
     }
