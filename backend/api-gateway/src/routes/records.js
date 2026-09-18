@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middlewares/auth.js";
 import { getLandRecordById, listLandRecords, verifyField } from "../models/LandRecord.js";
+import { logAction, getAuditLogsForEntity } from "../models/AuditLog.js";
 
 const router = Router();
 
@@ -17,6 +18,11 @@ router.get("/:id", requireAuth, async (req, res) => {
   return res.json({ record });
 });
 
+router.get("/:id/audit-log", requireAuth, async (req, res) => {
+  const logs = await getAuditLogsForEntity("land_record", req.params.id);
+  return res.json({ logs });
+});
+
 router.post("/:id/verify", requireAuth, requireRole("verifier", "admin"), async (req, res) => {
   const { fieldName, correctedValue } = req.body;
 
@@ -25,6 +31,12 @@ router.post("/:id/verify", requireAuth, requireRole("verifier", "admin"), async 
   }
 
   await verifyField(req.params.id, fieldName, req.auth.userId, correctedValue);
+
+  await logAction("land_record", req.params.id, "field_corrected", req.auth.userId,
+    { field: fieldName },
+    { field: fieldName, new_value: correctedValue }
+  );
+
   const updatedRecord = await getLandRecordById(req.params.id);
 
   return res.json({ record: updatedRecord });
