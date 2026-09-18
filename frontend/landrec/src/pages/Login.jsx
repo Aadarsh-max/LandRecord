@@ -29,6 +29,16 @@ export default function Login() {
     }
   }
 
+  function fillDemoAdmin() {
+    setEmail("admin@bhulekh.demo");
+    setPassword("Demo@1234");
+  }
+
+  function fillDemoVerifier() {
+    setEmail("verifier@bhulekh.demo");
+    setPassword("Demo@1234");
+  }
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-base-bg px-4">
       <FloatingBackground />
@@ -54,6 +64,24 @@ export default function Login() {
         </div>
 
         <div className="rounded-clay bg-base-surfaceLight p-8 shadow-clay sm:p-10">
+          <div className="mb-6 rounded-claySm bg-amia-500/10 p-4 text-sm">
+            <p className="font-medium text-amia-700">Demo Access (SIH Judges)</p>
+            <button
+              type="button"
+              onClick={fillDemoAdmin}
+              className="mt-2 block w-full rounded-lg bg-base-surfaceLight px-3 py-2 text-left text-xs text-ink-secondary shadow-claySm transition-colors hover:bg-white"
+            >
+              <span className="font-medium text-ink-primary">Admin</span> — admin@bhulekh.demo / Demo@1234
+            </button>
+            <button
+              type="button"
+              onClick={fillDemoVerifier}
+              className="mt-2 block w-full rounded-lg bg-base-surfaceLight px-3 py-2 text-left text-xs text-ink-secondary shadow-claySm transition-colors hover:bg-white"
+            >
+              <span className="font-medium text-ink-primary">Verifier</span> — verifier@bhulekh.demo / Demo@1234
+            </button>
+          </div>
+
           <h2 className="text-2xl font-semibold text-ink-primary">Welcome back</h2>
           <p className="mt-1 text-sm text-ink-secondary">Sign in to continue to your dashboard</p>
 

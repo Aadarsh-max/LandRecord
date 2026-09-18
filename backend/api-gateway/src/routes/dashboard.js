@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middlewares/auth.js";
 import { pool } from "../config/db.js";
+import { getCorrectionPatterns, getWorstPerformingFields } from "../models/CorrectionAnalytics.js";
 
 const router = Router();
 
@@ -80,6 +81,26 @@ router.get("/recent", requireAuth, async (req, res) => {
   );
 
   return res.json({ recent: recent.rows });
+});
+
+router.get("/learning-insights", requireAuth, async (req, res) => {
+  const correctionPatterns = await getCorrectionPatterns();
+  const worstFields = await getWorstPerformingFields();
+
+  const recommendations = worstFields
+    .filter((f) => parseFloat(f.avg_confidence) < 0.6)
+    .map((f) => ({
+      field: f.field_name,
+      issue: `Average confidence is ${Math.round(parseFloat(f.avg_confidence) * 100)}%, below the 60% reliability threshold.`,
+      suggestion: `Consider refining the extraction schema description for "${f.field_name}" or reviewing common failure patterns for this field.`
+    }));
+
+  return res.json({
+    correction_patterns: correctionPatterns,
+    worst_performing_fields: worstFields,
+    recommendations,
+    note: "This view surfaces patterns in verifier corrections and field confidence, forming the foundation for AI-driven improvement. Automated schema/prompt refinement based on this data is a planned next step."
+  });
 });
 
 export default router;

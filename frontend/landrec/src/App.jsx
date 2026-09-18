@@ -6,6 +6,7 @@ import UploadDocument from "./pages/UploadDocument";
 import VerificationQueue from "./pages/VerificationQueue";
 import SearchRecords from "./pages/SearchRecords";
 import CitizenLookup from "./pages/CitizenLookup";
+import LearningInsights from "./pages/LearningInsights";
 import { useAuth } from "./hooks/useAuth";
 
 function ProtectedRoute({ children }) {
@@ -26,6 +27,7 @@ export default function App() {
       <Route path="/verification" element={<ProtectedRoute><VerificationQueue /></ProtectedRoute>} />
       <Route path="/search" element={<ProtectedRoute><SearchRecords /></ProtectedRoute>} />
       <Route path="/check-status" element={<CitizenLookup />} />
+      <Route path="/insights" element={<ProtectedRoute><LearningInsights /></ProtectedRoute>} />
     </Routes>
   );
 }
