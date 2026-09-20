@@ -4,6 +4,7 @@ import numpy as np
 _index = None
 _id_map = []
 _dimension = 384
+MIN_SIMILARITY_THRESHOLD = 0.45
 
 
 def get_index():
@@ -26,7 +27,7 @@ def rebuild_index(records_with_embeddings):
     _id_map = [r["id"] for r in records_with_embeddings]
 
 
-def search_index(query_vector, top_k=5):
+def search_index(query_vector, top_k=5, min_score=MIN_SIMILARITY_THRESHOLD):
     global _index, _id_map
     if _index is None or _index.ntotal == 0:
         return []
@@ -38,5 +39,8 @@ def search_index(query_vector, top_k=5):
     for score, idx in zip(distances[0], indices[0]):
         if idx == -1:
             continue
+        if score < min_score:
+            continue
         results.append({"id": _id_map[idx], "score": float(score)})
+
     return results

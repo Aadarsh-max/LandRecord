@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, SearchX, Sparkles } from "lucide-react";
 import Sidebar from "../components/common/Sidebar";
 import SemanticSearchBar from "../components/search/SemanticSearchBar";
+import EmptyState from "../components/common/EmptyState";
+
+const EXAMPLE_QUERIES = [
+  "agricultural land near Ahmednagar",
+  "residential plots in Coimbatore",
+  "records with approved mutation status",
+];
 
 export default function SearchRecords() {
   const [results, setResults] = useState(null);
@@ -14,31 +21,49 @@ export default function SearchRecords() {
   }
 
   return (
-    <div className="flex min-h-screen bg-base-bg">
+    <div className="flex min-h-screen bg-base-bg pb-24 md:pb-0">
       <Sidebar />
 
-      <div className="flex-1 px-10 py-10">
-        <h1 className="text-2xl font-semibold text-ink-primary">Search records</h1>
+      <div className="flex-1 px-5 py-8 sm:px-10">
+        <h1 className="text-2xl font-semibold text-ink-primary">
+          Search records
+        </h1>
         <p className="mt-1 text-sm text-ink-secondary">
-          Search using plain language — e.g. "agricultural land near Ahmednagar"
+          Search using plain language — powered by semantic AI matching
         </p>
 
         <div className="mt-6 max-w-2xl">
           <SemanticSearchBar onResults={handleResults} />
+
+          {!searched && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {EXAMPLE_QUERIES.map((example) => (
+                <span
+                  key={example}
+                  className="rounded-full bg-base-surface px-3 py-1.5 text-xs text-ink-secondary shadow-claySm"
+                >
+                  {example}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mt-8">
           {!searched && (
-            <div className="flex flex-col items-center justify-center rounded-clay bg-base-surfaceLight p-16 text-center shadow-clayInset">
-              <Search className="mb-3 h-8 w-8 text-ink-muted" />
-              <p className="text-sm text-ink-secondary">Run a search to see matching records here.</p>
-            </div>
+            <EmptyState
+              icon={Sparkles}
+              title="Search across all digitized records"
+              subtitle="Try a natural-language query like 'agricultural land near Ahmednagar' — no need for exact survey numbers."
+            />
           )}
 
           {searched && results?.length === 0 && (
-            <div className="rounded-clay bg-base-surfaceLight p-10 text-center shadow-clay">
-              <p className="text-sm text-ink-secondary">No matching records found. Try a broader query.</p>
-            </div>
+            <EmptyState
+              icon={SearchX}
+              title="No closely matching records"
+              subtitle="We only show results that are genuinely relevant. Try a broader or different search query."
+            />
           )}
 
           {searched && results?.length > 0 && (
@@ -56,8 +81,11 @@ export default function SearchRecords() {
                     </p>
                     <p className="mt-1 flex items-center gap-1 text-xs text-ink-muted">
                       <MapPin className="h-3 w-3" />
-                      {match.record?.village || "Unknown village"}, {match.record?.district || "Unknown district"}
-                      {match.record?.survey_number ? ` · Survey ${match.record.survey_number}` : ""}
+                      {match.record?.village || "Unknown village"},{" "}
+                      {match.record?.district || "Unknown district"}
+                      {match.record?.survey_number
+                        ? ` · Survey ${match.record.survey_number}`
+                        : ""}
                     </p>
                   </div>
                   <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600">

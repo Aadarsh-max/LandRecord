@@ -70,13 +70,14 @@ async def index_records(payload: IndexRequest):
 class SearchRequest(BaseModel):
     query: str
     top_k: int = 5
+    min_score: float = 0.45
 
 
 @router.post("/search/query")
 async def query_records(payload: SearchRequest):
     filters = parse_query_filters(payload.query)
     query_vector = generate_embedding(payload.query)
-    matches = search_index(query_vector, top_k=payload.top_k)
+    matches = search_index(query_vector, top_k=payload.top_k, min_score=payload.min_score)
     return {"matches": matches, "filters_detected": filters}
 
 
