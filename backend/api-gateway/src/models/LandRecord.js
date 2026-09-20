@@ -2,8 +2,8 @@ import { pool } from "../config/db.js";
 
 function extractNumericArea(rawValue) {
   if (!rawValue) return null;
-  const match = String(rawValue).match(/[\d.]+/);
-  return match ? parseFloat(match[0]) : null;
+  const match = String(rawValue).match(/^\s*(\d+\.?\d*)/);
+  return match ? parseFloat(match[1]) : null;
 }
 
 export async function createLandRecord(documentId, fields) {
