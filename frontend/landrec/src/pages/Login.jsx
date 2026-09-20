@@ -2,10 +2,16 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail } from "lucide-react";
 import FloatingBackground from "../components/common/FloatingBackground";
+import AuthIllustration from "../components/common/AuthIllustration";
 import TextInput from "../components/common/TextInput";
 import PasswordInput from "../components/common/PasswordInput";
 import Button from "../components/common/Button";
 import { useAuth } from "../hooks/useAuth";
+
+const DEMO_ACCOUNTS = [
+  { label: "Demo Admin", email: "admin@bhulekh.demo", password: "Demo@1234" },
+  { label: "Demo Operator", email: "operator@bhulekh.demo", password: "Demo@1234" }
+];
 
 export default function Login() {
   const navigate = useNavigate();
@@ -29,57 +35,34 @@ export default function Login() {
     }
   }
 
-  function fillDemoAdmin() {
-    setEmail("admin@bhulekh.demo");
-    setPassword("Demo@1234");
-  }
-
-  function fillDemoVerifier() {
-    setEmail("verifier@bhulekh.demo");
-    setPassword("Demo@1234");
+  function fillDemo(account) {
+    setEmail(account.email);
+    setPassword(account.password);
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-base-bg px-4">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-base-bg px-4 py-8">
       <FloatingBackground />
 
       <div className="grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="hidden flex-col justify-between rounded-clay bg-gradient-to-br from-blue-600 to-green-600 p-10 text-white shadow-clay md:flex">
-          <div>
-            <p className="text-sm uppercase tracking-widest text-white/70">BhuLekh AI</p>
-            <h1 className="mt-4 text-3xl font-semibold leading-snug">
-              Intelligent land record digitization for every village, tehsil and district.
-            </h1>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-claySm bg-white/10 p-4 backdrop-blur-sm">
-              <p className="text-2xl font-semibold">98.4%</p>
-              <p className="text-xs text-white/70">OCR field accuracy</p>
-            </div>
-            <div className="rounded-claySm bg-white/10 p-4 backdrop-blur-sm">
-              <p className="text-2xl font-semibold">12k+</p>
-              <p className="text-xs text-white/70">Records digitized</p>
-            </div>
-          </div>
-        </div>
+        <AuthIllustration />
 
-        <div className="rounded-clay bg-base-surfaceLight p-8 shadow-clay sm:p-10">
+        <div className="rounded-clay bg-base-surfaceLight p-6 shadow-clay sm:p-10">
           <div className="mb-6 rounded-claySm bg-amia-500/10 p-4 text-sm">
-            <p className="font-medium text-amia-700">Demo Access (SIH Judges)</p>
-            <button
-              type="button"
-              onClick={fillDemoAdmin}
-              className="mt-2 block w-full rounded-lg bg-base-surfaceLight px-3 py-2 text-left text-xs text-ink-secondary shadow-claySm transition-colors hover:bg-white"
-            >
-              <span className="font-medium text-ink-primary">Admin</span> — admin@bhulekh.demo / Demo@1234
-            </button>
-            <button
-              type="button"
-              onClick={fillDemoVerifier}
-              className="mt-2 block w-full rounded-lg bg-base-surfaceLight px-3 py-2 text-left text-xs text-ink-secondary shadow-claySm transition-colors hover:bg-white"
-            >
-              <span className="font-medium text-ink-primary">Verifier</span> — verifier@bhulekh.demo / Demo@1234
-            </button>
+            <p className="font-medium text-amia-700">Demo Access for SIH Judges</p>
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  onClick={() => fillDemo(account)}
+                  className="rounded-lg bg-base-surfaceLight px-3 py-2 text-left text-xs text-ink-secondary shadow-claySm transition-colors hover:bg-white"
+                >
+                  <span className="block font-medium text-ink-primary">{account.label}</span>
+                  <span className="block truncate">{account.email}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <h2 className="text-2xl font-semibold text-ink-primary">Welcome back</h2>

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { ClipboardList, MousePointerClick } from "lucide-react";
 import Sidebar from "../components/common/Sidebar";
 import FieldReviewCard from "../components/review/FieldReviewCard";
+import EmptyState from "../components/common/EmptyState";
 import api from "../services/api";
 import RiskScoreWidget from "../components/dashboard/RiskScoreWidget";
-import ParcelMap from "../components/map/ParcelMap";
 import EkycWidget from "../components/dashboard/EkycWidget";
+import ParcelMap from "../components/map/ParcelMap";
 
 export default function VerificationQueue() {
   const location = useLocation();
@@ -88,43 +90,49 @@ export default function VerificationQueue() {
     : [];
 
   return (
-    <div className="flex min-h-screen bg-base-bg">
+    <div className="flex min-h-screen bg-base-bg pb-24 md:pb-0">
       <Sidebar />
 
-      <div className="flex flex-1">
-        <div className="w-72 border-r border-ink-muted/10 px-5 py-8">
+      <div className="flex flex-1 flex-col md:flex-row">
+        <div className="border-b border-ink-muted/10 px-5 py-6 md:w-72 md:border-b-0 md:border-r md:py-8">
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-muted">
             Records
           </h2>
-          <div className="space-y-2">
-            {records.map((record) => (
-              <button
-                key={record.id}
-                onClick={() => loadRecordDetail(record.id)}
-                className={`w-full rounded-claySm p-3 text-left text-sm transition-all ${
-                  selectedRecord?.id === record.id
-                    ? "bg-blue-500/10 font-medium text-blue-600"
-                    : "text-ink-secondary hover:bg-base-surface"
-                }`}
-              >
-                {record.landowner_name || "Unnamed record"}
-                <p className="text-xs text-ink-muted">
-                  {record.survey_number || "No survey no."}
-                </p>
-              </button>
-            ))}
-            {!loading && records.length === 0 && (
-              <p className="text-sm text-ink-muted">
-                No records yet. Upload a document to get started.
-              </p>
-            )}
-          </div>
+
+          {!loading && records.length === 0 ? (
+            <EmptyState
+              icon={ClipboardList}
+              title="No records yet"
+              subtitle="Upload a document to see it here for review."
+              actionLabel="Upload a document"
+              actionTo="/upload"
+            />
+          ) : (
+            <div className="space-y-2">
+              {records.map((record) => (
+                <button
+                  key={record.id}
+                  onClick={() => loadRecordDetail(record.id)}
+                  className={`w-full rounded-claySm p-3 text-left text-sm transition-all ${
+                    selectedRecord?.id === record.id
+                      ? "bg-blue-500/10 font-medium text-blue-600"
+                      : "text-ink-secondary hover:bg-base-surface"
+                  }`}
+                >
+                  {record.landowner_name || "Unnamed record"}
+                  <p className="text-xs text-ink-muted">
+                    {record.survey_number || "No survey no."}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="flex-1 px-10 py-8">
+        <div className="flex-1 px-5 py-8 sm:px-10">
           {selectedRecord ? (
             <>
-              <div className="flex items-start justify-between">
+              <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
                   <h1 className="text-2xl font-semibold text-ink-primary">
                     {selectedRecord.landowner_name || "Unverified record"}
@@ -161,6 +169,7 @@ export default function VerificationQueue() {
                   />
                 ))}
               </div>
+
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <RiskScoreWidget recordId={selectedRecord.id} />
                 <EkycWidget record={selectedRecord} />
@@ -170,9 +179,13 @@ export default function VerificationQueue() {
               </div>
             </>
           ) : (
-            <p className="text-ink-secondary">
-              Select a record to review, or upload a new document.
-            </p>
+            <EmptyState
+              icon={MousePointerClick}
+              title="Select a record to review"
+              subtitle="Choose a record from the list, or upload a new document to get started."
+              actionLabel="Upload a document"
+              actionTo="/upload"
+            />
           )}
         </div>
       </div>
