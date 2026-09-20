@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ScanLine, Sparkles, ShieldCheck, MapPin } from "lucide-react";
+import { ScanLine, Sparkles, ShieldCheck, MapPin, Languages, FileCheck2, Zap } from "lucide-react";
 import Sidebar from "../components/common/Sidebar";
 import DropZone from "../components/upload/DropZone";
 import Button from "../components/common/Button";
@@ -10,15 +10,26 @@ const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },
   { value: "hindi", label: "Hindi" },
   { value: "marathi", label: "Marathi" },
-  { value: "tamil", label: "Tamil" },
-  { value: "telugu", label: "Telugu" },
   { value: "bengali", label: "Bengali" },
   { value: "gujarati", label: "Gujarati" },
   { value: "kannada", label: "Kannada" },
   { value: "malayalam", label: "Malayalam" },
   { value: "odia", label: "Odia" },
   { value: "punjabi", label: "Punjabi" },
-  { value: "urdu", label: "Urdu" }
+  { value: "tamil", label: "Tamil" },
+  { value: "telugu", label: "Telugu" },
+  { value: "urdu", label: "Urdu" },
+  { value: "assamese", label: "Assamese" },
+  { value: "bodo", label: "Bodo" },
+  { value: "dogri", label: "Dogri" },
+  { value: "kashmiri", label: "Kashmiri" },
+  { value: "konkani", label: "Konkani" },
+  { value: "maithili", label: "Maithili" },
+  { value: "manipuri", label: "Manipuri" },
+  { value: "nepali", label: "Nepali" },
+  { value: "sanskrit", label: "Sanskrit" },
+  { value: "santali", label: "Santali" },
+  { value: "sindhi", label: "Sindhi" }
 ];
 
 const STEPS = [
@@ -27,6 +38,18 @@ const STEPS = [
   { icon: ShieldCheck, title: "Validation", desc: "Business rules, duplicates and e-KYC ownership checks run automatically." },
   { icon: MapPin, title: "GIS Mapping", desc: "The parcel location is geocoded and plotted on a live map." }
 ];
+
+const HIGHLIGHTS = [
+  { icon: Zap, title: "Fast turnaround", desc: "Most documents are fully processed in under 15 seconds.", tone: "blue" },
+  { icon: FileCheck2, title: "12 fields extracted", desc: "Owner, survey/khasra/khata number, area, and more — automatically.", tone: "green" },
+  { icon: ShieldCheck, title: "Confidence scored", desc: "Only uncertain fields are flagged for human review.", tone: "amia" }
+];
+
+const toneStyles = {
+  blue: "bg-gradient-to-br from-blue-500 to-blue-600",
+  green: "bg-gradient-to-br from-green-500 to-green-600",
+  amia: "bg-gradient-to-br from-amia-500 to-amia-600"
+};
 
 export default function UploadDocument() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -88,9 +111,34 @@ export default function UploadDocument() {
             >
               {uploading ? "Processing document..." : "Upload and Extract"}
             </Button>
+
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {HIGHLIGHTS.map(({ icon: Icon, title, desc, tone }) => (
+                <div key={title} className="rounded-clay bg-base-surfaceLight p-5 shadow-clay">
+                  <div className={`inline-flex h-9 w-9 items-center justify-center rounded-claySm text-white ${toneStyles[tone]}`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-ink-primary">{title}</p>
+                  <p className="mt-1 text-xs text-ink-secondary">{desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 rounded-clay bg-base-surfaceLight p-6 shadow-clay">
+              <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink-primary">
+                <Languages className="h-4 w-4 text-blue-600" /> Supported languages
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {LANGUAGE_OPTIONS.map((option) => (
+                  <span key={option.value} className="rounded-full bg-base-surface px-3 py-1.5 text-xs text-ink-secondary shadow-claySm">
+                    {option.label}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-clay bg-base-surfaceLight p-6 shadow-clay">
+          <div className="rounded-clay bg-base-surfaceLight p-6 shadow-clay lg:sticky lg:top-6 lg:self-start">
             <p className="mb-5 text-sm font-semibold text-ink-primary">How it works</p>
             <div className="space-y-5">
               {STEPS.map(({ icon: Icon, title, desc }, i) => (

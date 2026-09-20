@@ -52,18 +52,29 @@ SCHEMA_BY_DOCUMENT_TYPE = {
 
 LANGUAGE_CODE_MAP = {
     "en": "en-IN",
-    "devanagari": "hi-IN",
     "hindi": "hi-IN",
+    "devanagari": "hi-IN",
     "marathi": "mr-IN",
-    "tamil": "ta-IN",
-    "telugu": "te-IN",
     "bengali": "bn-IN",
     "gujarati": "gu-IN",
     "kannada": "kn-IN",
     "malayalam": "ml-IN",
-    "odia": "od-IN",
+    "odia": "or-IN",
     "punjabi": "pa-IN",
-    "urdu": "ur-IN"
+    "tamil": "ta-IN",
+    "telugu": "te-IN",
+    "urdu": "ur-IN",
+    "assamese": "as-IN",
+    "bodo": "bodo-IN",
+    "dogri": "doi-IN",
+    "kashmiri": "ks-IN",
+    "konkani": "kok-IN",
+    "maithili": "mai-IN",
+    "manipuri": "mni-IN",
+    "nepali": "ne-IN",
+    "sanskrit": "sa-IN",
+    "santali": "sat-IN",
+    "sindhi": "sd-IN"
 }
 
 TRANSLATE_FIELDS_PROMPT = """You will receive a JSON object with land record field values, possibly in an Indian regional language.
