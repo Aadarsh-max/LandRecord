@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail } from "lucide-react";
+import { Mail, ShieldCheck, UserCheck, Loader2 } from "lucide-react";
 import FloatingBackground from "../components/common/FloatingBackground";
 import AuthIllustration from "../components/common/AuthIllustration";
 import TextInput from "../components/common/TextInput";
@@ -9,8 +9,22 @@ import Button from "../components/common/Button";
 import { useAuth } from "../hooks/useAuth";
 
 const DEMO_ACCOUNTS = [
-  { label: "Demo Admin", email: "admin@bhulekh.demo", password: "Demo@1234" },
-  { label: "Demo Operator", email: "operator@bhulekh.demo", password: "Demo@1234" }
+  {
+    role: "Admin",
+    email: "admin@bhulekh.demo",
+    password: "Demo@1234",
+    icon: ShieldCheck,
+    desc: "Full access — verify records, view all dashboards",
+    gradient: "from-blue-500 to-blue-600"
+  },
+  {
+    role: "Operator",
+    email: "operator@bhulekh.demo",
+    password: "Demo@1234",
+    icon: UserCheck,
+    desc: "Upload and process documents",
+    gradient: "from-green-500 to-amia-600"
+  }
 ];
 
 export default function Login() {
@@ -19,6 +33,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [demoLoadingRole, setDemoLoadingRole] = useState(null);
   const [error, setError] = useState("");
 
   async function handleSubmit(event) {
@@ -35,9 +50,17 @@ export default function Login() {
     }
   }
 
-  function fillDemo(account) {
-    setEmail(account.email);
-    setPassword(account.password);
+  async function handleDemoLogin(account) {
+    setError("");
+    setDemoLoadingRole(account.role);
+    try {
+      await login(account.email, account.password);
+      navigate("/dashboard");
+    } catch {
+      setError(`Could not sign in as demo ${account.role.toLowerCase()}. Please try manual login.`);
+    } finally {
+      setDemoLoadingRole(null);
+    }
   }
 
   return (
@@ -48,27 +71,43 @@ export default function Login() {
         <AuthIllustration />
 
         <div className="rounded-clay bg-base-surfaceLight p-6 shadow-clay sm:p-10">
-          <div className="mb-6 rounded-claySm bg-amia-500/10 p-4 text-sm">
-            <p className="font-medium text-amia-700">Demo Access for SIH Judges</p>
-            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {DEMO_ACCOUNTS.map((account) => (
-                <button
-                  key={account.email}
-                  type="button"
-                  onClick={() => fillDemo(account)}
-                  className="rounded-lg bg-base-surfaceLight px-3 py-2 text-left text-xs text-ink-secondary shadow-claySm transition-colors hover:bg-white"
-                >
-                  <span className="block font-medium text-ink-primary">{account.label}</span>
-                  <span className="block truncate">{account.email}</span>
-                </button>
-              ))}
+          <div className="mb-6">
+            <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-ink-muted">
+              Judges — sign in instantly
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {DEMO_ACCOUNTS.map((account) => {
+                const Icon = account.icon;
+                const isLoading = demoLoadingRole === account.role;
+                return (
+                  <button
+                    key={account.role}
+                    type="button"
+                    onClick={() => handleDemoLogin(account)}
+                    disabled={isLoading || demoLoadingRole !== null}
+                    className={`group relative overflow-hidden rounded-claySm bg-gradient-to-br ${account.gradient} p-4 text-left text-white shadow-clay transition-all duration-300 hover:-translate-y-0.5 hover:shadow-claySm disabled:opacity-70`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
+                      <span className="text-sm font-semibold">Continue as {account.role}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-white/80">{account.desc}</p>
+                  </button>
+                );
+              })}
             </div>
+          </div>
+
+          <div className="mb-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-ink-muted/15" />
+            <span className="text-xs text-ink-muted">or sign in manually</span>
+            <div className="h-px flex-1 bg-ink-muted/15" />
           </div>
 
           <h2 className="text-2xl font-semibold text-ink-primary">Welcome back</h2>
           <p className="mt-1 text-sm text-ink-secondary">Sign in to continue to your dashboard</p>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             <TextInput
               id="email"
               label="Email address"

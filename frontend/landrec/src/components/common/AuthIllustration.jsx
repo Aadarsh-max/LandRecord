@@ -1,21 +1,28 @@
-import { FileText, MapPin, ShieldCheck, Languages } from "lucide-react";
+import { FileText, MapPin, ShieldCheck, Languages, Sparkles } from "lucide-react";
 
 export default function AuthIllustration() {
   return (
     <div className="relative hidden overflow-hidden rounded-clay bg-gradient-to-br from-blue-600 via-blue-500 to-green-600 p-10 shadow-clay md:flex md:flex-col md:justify-between">
       <div className="absolute -right-10 -top-10 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
       <div className="absolute -bottom-16 -left-10 h-64 w-64 rounded-full bg-amia-400/20 blur-2xl" />
+      <div className="absolute inset-0 opacity-[0.05]" style={{
+        backgroundImage: "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
+        backgroundSize: "36px 36px"
+      }} />
 
       <div className="relative z-10">
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+          <Sparkles className="h-3 w-3" /> Smart India Hackathon 2026
+        </div>
         <p className="text-sm uppercase tracking-widest text-white/70">BhuLekh AI</p>
-        <h1 className="mt-4 text-3xl font-semibold leading-snug text-white">
+        <h1 className="mt-3 text-3xl font-semibold leading-snug text-white">
           Intelligent land record digitization for every village, tehsil and district.
         </h1>
       </div>
 
       <div className="relative z-10 mt-10 flex justify-center">
         <div className="relative flex h-56 w-56 items-center justify-center">
-          <div className="absolute inset-0 rounded-clay bg-white/10 backdrop-blur-sm" />
+          <div className="absolute inset-0 animate-pulseGlow rounded-clay bg-white/10 backdrop-blur-sm" />
           <FileText className="h-16 w-16 text-white/90" />
 
           <div className="absolute -left-4 -top-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-clay">

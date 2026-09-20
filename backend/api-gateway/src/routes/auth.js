@@ -5,19 +5,23 @@ import { pool } from "../config/db.js";
 
 const router = Router();
 
+const ALLOWED_SIGNUP_ROLES = ["operator", "verifier", "admin"];
+
 router.post("/signup", async (req, res) => {
-  const { name, email, password, department } = req.body;
+  const { name, email, password, department, role } = req.body;
 
   const existing = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
   if (existing.rowCount > 0) {
     return res.status(409).json({ message: "Email already registered" });
   }
 
+  const finalRole = ALLOWED_SIGNUP_ROLES.includes(role) ? role : "operator";
+
   const passwordHash = await bcrypt.hash(password, 10);
   const result = await pool.query(
     `INSERT INTO users (name, email, password_hash, department, role)
-     VALUES ($1, $2, $3, $4, 'operator') RETURNING id, name, email, role, department`,
-    [name, email, passwordHash, department]
+     VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role, department`,
+    [name, email, passwordHash, department, finalRole]
   );
 
   return res.status(201).json({ user: result.rows[0] });

@@ -25,8 +25,14 @@ export function AuthProvider({ children }) {
     return loggedInUser;
   }
 
-  async function signup(name, email, password, department) {
-    const response = await api.post("/auth/signup", { name, email, password, department });
+  async function signup(name, email, password, department, role) {
+    const response = await api.post("/auth/signup", {
+      name,
+      email,
+      password,
+      department,
+      role,
+    });
     return response.data.user;
   }
 

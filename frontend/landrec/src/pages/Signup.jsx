@@ -1,12 +1,44 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, User, Building2 } from "lucide-react";
+import { Mail, User, Building2, ShieldCheck, UserCheck } from "lucide-react";
 import FloatingBackground from "../components/common/FloatingBackground";
 import AuthIllustration from "../components/common/AuthIllustration";
 import TextInput from "../components/common/TextInput";
+import SelectInput from "../components/common/SelectInput";
 import PasswordInput from "../components/common/PasswordInput";
 import Button from "../components/common/Button";
 import { useAuth } from "../hooks/useAuth";
+
+const DEPARTMENTS = [
+  "Department of Land Resources (DoLR)",
+  "Revenue Department",
+  "Survey and Settlement Department",
+  "Registration and Stamps Department",
+  "Panchayati Raj Department",
+  "Rural Development Department",
+  "Urban Development Department",
+  "District Collectorate",
+  "Tehsil / Taluka Office",
+  "State Land Records Bureau",
+  "Other Government Department"
+];
+
+const ROLE_OPTIONS = [
+  {
+    value: "operator",
+    label: "Operator",
+    desc: "Upload and process documents",
+    icon: UserCheck,
+    gradient: "from-green-500 to-amia-600"
+  },
+  {
+    value: "admin",
+    label: "Admin",
+    desc: "Full access — verify records, view dashboards",
+    icon: ShieldCheck,
+    gradient: "from-blue-500 to-blue-600"
+  }
+];
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -16,7 +48,8 @@ export default function Signup() {
     email: "",
     department: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    role: "operator"
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +69,7 @@ export default function Signup() {
 
     setLoading(true);
     try {
-      await signup(form.name, form.email, form.password, form.department);
+      await signup(form.name, form.email, form.password, form.department, form.role);
       await login(form.email, form.password);
       navigate("/dashboard");
     } catch (signupError) {
@@ -57,7 +90,35 @@ export default function Signup() {
           <h2 className="text-2xl font-semibold text-ink-primary">Create your account</h2>
           <p className="mt-1 text-sm text-ink-secondary">Get access to the digitization dashboard</p>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+            <div>
+              <p className="mb-2 text-sm font-medium text-ink-secondary">Sign up as</p>
+              <div className="grid grid-cols-2 gap-3">
+                {ROLE_OPTIONS.map((option) => {
+                  const Icon = option.icon;
+                  const isSelected = form.role === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => updateField("role", option.value)}
+                      className={`rounded-claySm p-3 text-left transition-all duration-200 ${
+                        isSelected
+                          ? `bg-gradient-to-br ${option.gradient} text-white shadow-clay`
+                          : "bg-base-surface text-ink-secondary shadow-clayInset hover:bg-white"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <p className="mt-1.5 text-sm font-semibold">{option.label}</p>
+                      <p className={`mt-0.5 text-[11px] ${isSelected ? "text-white/80" : "text-ink-muted"}`}>
+                        {option.desc}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <TextInput
               id="name"
               label="Full name"
@@ -77,11 +138,11 @@ export default function Signup() {
               onChange={(event) => updateField("email", event.target.value)}
               required
             />
-            <TextInput
+            <SelectInput
               id="department"
               label="Department"
-              placeholder="Dept of Land Resources"
               icon={<Building2 className="h-4 w-4" />}
+              options={DEPARTMENTS}
               value={form.department}
               onChange={(event) => updateField("department", event.target.value)}
               required
