@@ -1,3 +1,7 @@
 import dotenv from "dotenv";
+import fs from "fs";
 
-dotenv.config({ path: "../../.env" });
+const envPath = "../../.env";
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}

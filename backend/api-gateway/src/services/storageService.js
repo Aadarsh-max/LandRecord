@@ -10,7 +10,7 @@ const minioClient = isProduction
       useSSL: true,
       accessKey: process.env.B2_KEY_ID,
       secretKey: process.env.B2_APPLICATION_KEY,
-      region: process.env.B2_REGION || "us-west-004"
+      region: process.env.B2_REGION || "us-east-005"
     })
   : new Client({
       endPoint: (process.env.MINIO_ENDPOINT || "localhost:9000").split(":")[0],
