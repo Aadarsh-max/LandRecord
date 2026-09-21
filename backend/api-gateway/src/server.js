@@ -32,8 +32,8 @@ app.use("/api/integrations", integrationRoutes);
 app.use("/api/ekyc", ekycRoutes);
 app.use("/api/public", publicRoutes);
 
-const port = process.env.PORT || process.env.API_PORT || 4000;
+const port = process.env.PORT || 4000;
 
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`api-gateway running on port ${port}`);
 });
